@@ -1,0 +1,571 @@
+<title>nbdevlab Homelab Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  /* Layout: one long page on pitch black. Open bands split by hairlines; figures fill the column and
+     can switch to full size with sideways scroll. Colour means network, violet means slerm. */
+  --bg: #000000;
+  --card: #06080c;
+  --raise: #0e1118;
+  --line: #1b2029;
+  --line-2: #2a313d;
+  --text: #e7ecf3;
+  --text-2: #a4aebd;
+  --muted: #677284;
+  --accent: #8ea8ff;
+  --violet: #b69bff;
+  --violet-wash: rgba(182,155,255,.12);
+  --lan: #3ddc97;
+  --mgmt: #f3b64b;
+  --srv: #8ea8ff;
+  --dmz: #ff7a90;
+  --bad: #ff6b6b;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --ease: cubic-bezier(.2,.8,.2,1);
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--text); }
+body { margin: 0; font: 15px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+
+/* svg */
+.pz { display: block; height: auto; }
+.pz text { font-family: var(--sans); font-size: 12.5px; fill: var(--text-2); }
+.pz .m { font-family: var(--mono); font-size: 11px; }
+.pz .sm { font-size: 12.5px; }
+.pz .xs { font-size: 10.5px; }
+.pz .ey { font-size: 10px; letter-spacing: .14em; font-weight: 500; fill: var(--muted); }
+.pz .ti { font-size: 17px; font-weight: 600; fill: var(--text); letter-spacing: -.01em; }
+.pz .nm { font-size: 13px; font-weight: 600; fill: var(--text); }
+.pz .big { font-size: 30px; font-weight: 600; fill: var(--text); letter-spacing: -.02em; }
+.pz .mu, .pz tspan.mu { fill: var(--muted); }
+.pz .tx { fill: var(--text); }
+.pz .card { fill: var(--card); stroke: var(--line-2); stroke-width: 1; }
+.pz .frame { fill: none; }
+.pz .card-hi { stroke: #3a4352; }
+.pz .parked-card { stroke-dasharray: 4 4; }
+.pz .hr { stroke: var(--line); stroke-width: 1; }
+.pz .grid { stroke: var(--line); stroke-width: 1; }
+.pz .w { fill: none; stroke-width: 2.25; stroke-linecap: round; }
+.pz .stub { fill: none; stroke-width: 3; stroke-linecap: round; }
+.pz .halo { fill: none; stroke: var(--bg); stroke-width: 9; }
+.pz .nt { fill: none; stroke: var(--muted); stroke-width: 1.25; }
+.pz .dash { stroke-dasharray: 5 5; }
+.pz .req { fill: none; stroke: var(--violet); stroke-width: 1.75; }
+.pz .ah { fill: var(--muted); }
+.pz .pw-b { fill: none; stroke: var(--text-2); stroke-width: 2; }
+.pz .pw-s { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.pz .psu { fill: var(--text-2); }
+.pz .st-run { fill: var(--text); }
+.pz .st-off { fill: var(--bg); stroke: var(--text-2); stroke-width: 1.25; }
+.pz .pill { fill: none; stroke-width: 1; }
+.pz .p-tun { stroke: var(--line-2); }
+.pz .pt-tun { fill: var(--text-2); }
+.pz .p-slerm { stroke: var(--violet); }
+.pz .pt-slerm { fill: var(--violet); }
+.pz .p-state { stroke: var(--line-2); fill: var(--card); }
+.pz .s-lan { stroke: var(--lan); } .pz .f-lan { fill: var(--lan); }
+.pz .s-mgmt { stroke: var(--mgmt); } .pz .f-mgmt { fill: var(--mgmt); }
+.pz .s-srv { stroke: var(--srv); } .pz .f-srv { fill: var(--srv); }
+.pz .s-dmz { stroke: var(--dmz); } .pz .f-dmz { fill: var(--dmz); }
+.pz .seg { stroke: none; }
+.pz .gpu1 { fill: var(--violet); } .pz .gpu2 { fill: #8f74e0; }
+.pz .cpu1 { fill: #5d6678; } .pz .cpu2 { fill: #4b5364; } .pz .cpu3 { fill: #7a8499; }
+.pz .seg-t { fill: #0b0d12; font-weight: 500; }
+.pz .bar { fill: var(--violet); }
+.pz .b-wait { fill: #3a4352; }
+.pz .b-off { fill: var(--text-2); }
+.pz .b-keep { fill: #1c2230; stroke: var(--line-2); }
+.pz .b-slerm { fill: rgba(182,155,255,.16); stroke: rgba(182,155,255,.45); }
+.pz .b-keep + text, .pz .b-slerm + text { fill: var(--text-2); }
+.pz .deadline { stroke: var(--bad); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.pz .dl { fill: var(--bad); }
+
+/* motion: packets ride the wires, running dots breathe, tunnels march, the outage replays.
+   Everything here is off unless the page sets .motion on the root, so the PNG posters stay still. */
+.pz .pk { pointer-events: none; }
+:root:not(.motion) .pz .pk { display: none; }
+.pz .pk-c { fill: currentColor; }
+.pz .pk-h { fill: currentColor; opacity: .2; }
+.pz .k-text { color: var(--text); } .pz .k-power { color: var(--text-2); } .pz .k-violet { color: var(--violet); }
+.pz .k-lan { color: var(--lan); } .pz .k-mgmt { color: var(--mgmt); }
+.pz .k-srv { color: var(--srv); } .pz .k-dmz { color: var(--dmz); }
+.pz .ph { display: none; pointer-events: none; transition: opacity .6s var(--ease); }
+.motion .pz .ph.on { display: inline; }
+.pz .ph-veil { fill: var(--bg); opacity: .62; }
+.pz .ph-line { stroke: var(--text); stroke-width: 1.25; }
+.pz .ph-tag { fill: var(--text); }
+.pz .ph-t { font-family: var(--mono); font-size: 10.5px; font-weight: 500; fill: var(--bg); }
+.motion .pz .st-run { animation: breathe 3.6s ease-in-out infinite; }
+.motion .pz .dash { animation: march 1.6s linear infinite; }
+.motion .pz .p-state { animation: state-on 10s linear infinite; }
+@keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes march { to { stroke-dashoffset: 10; } }
+@keyframes state-on {
+  0%, 22% { stroke: var(--violet); fill: var(--violet-wash); }
+  26%, 100% { stroke: var(--line-2); fill: var(--card); }
+}
+
+/* scroll reveal: the page hides only what starts below the fold (.rv-on on the root), then builds each
+   diagram as it scrolls in. Cards rise, wires draw, bars grow, text settles; traffic starts when it's done. */
+.rv-on .pz .rv-s { opacity: 0; animation: none; }
+.rv-on .pz .rv-in { animation: rv-fade .55s var(--ease) both; }
+.rv-on .pz text.rv-in { animation-name: rv-rise; animation-duration: .65s; }
+.rv-on .pz .card.rv-in { animation: rv-card .75s var(--ease) both; transform-box: fill-box; transform-origin: 50% 50%; }
+.rv-on .pz line.rv-in.w, .rv-on .pz line.rv-in.req, .rv-on .pz line.rv-in.pw-b,
+.rv-on .pz line.rv-in.nt:not(.dash), .rv-on .pz path.rv-in.nt {
+  stroke-dasharray: var(--len) var(--len); animation: rv-draw .95s var(--ease) both; }
+.rv-on .pz .rv-in.b-wait, .rv-on .pz .rv-in.b-off, .rv-on .pz .rv-in.b-keep, .rv-on .pz .rv-in.b-slerm,
+.rv-on .pz .rv-in.bar, .rv-on .pz .rv-in.seg {
+  animation: rv-grow .9s var(--ease) both; transform-box: fill-box; transform-origin: 0 50%; }
+.rv-on .pz.rv-pending .pk, .rv-on .pz.rv-pending .ph { visibility: hidden; }
+@keyframes rv-fade { from { opacity: 0; } }
+@keyframes rv-rise { from { opacity: 0; translate: 0 8px; } }
+@keyframes rv-card { from { opacity: 0; scale: .96; } }
+@keyframes rv-draw { 0% { stroke-dashoffset: var(--len); opacity: 0; } 25% { opacity: 1; } }
+@keyframes rv-grow { from { scale: 0 1; } }
+
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 24px; }
+@media (max-width: 600px) { .wrap { padding-inline: 16px; } }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(0,0,0,.86);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; gap: 20px; align-items: center; justify-content: space-between; min-height: 52px; flex-wrap: wrap; }
+.brand { font-weight: 600; letter-spacing: -.01em; font-size: 15px; }
+.brand i { font-style: normal; color: var(--accent); }
+nav.jump { display: flex; gap: 4px; flex-wrap: wrap; }
+nav.jump a { color: var(--text-2); text-decoration: none; font-size: 13px; padding: 5px 9px; border-radius: 7px; }
+nav.jump a:hover, nav.jump a:focus-visible { background: var(--raise); color: var(--text); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.hero { padding-block: 56px 28px; }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.02; letter-spacing: -.035em; margin: 14px 0 16px; font-weight: 600; text-wrap: balance; }
+h1 span { color: var(--muted); font-weight: 500; }
+.lede { max-width: 68ch; color: var(--text-2); font-size: 16.5px; margin: 0; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line); margin-top: 32px; }
+.stat { padding: 16px 16px 14px 0; min-width: 0; }
+.stat + .stat { padding-left: 16px; border-left: 1px solid var(--line); }
+@media (max-width: 700px) { .stat + .stat { border-left: 0; padding-left: 0; } }
+.stat b { display: block; font: 600 26px/1.1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12.5px; color: var(--muted); }
+
+.controls { display: flex; gap: 10px 22px; flex-wrap: wrap; align-items: center; padding-block: 16px; color: var(--text-2); font-size: 13.5px; }
+.switch { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; }
+.switch input { appearance: none; width: 32px; height: 18px; border-radius: 9px; background: var(--line-2); position: relative; margin: 0; cursor: pointer; transition: background .2s var(--ease); }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--text); transition: transform .2s var(--ease); }
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { transform: translateX(14px); }
+.seg-ctl { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }
+.seg-ctl button { background: none; border: 0; color: var(--text-2); font: inherit; font-size: 13px; padding: 5px 11px; cursor: pointer; }
+.seg-ctl button[aria-pressed="true"] { background: var(--raise); color: var(--text); }
+
+section.band { border-top: 1px solid var(--line); padding-block: 40px 44px; scroll-margin-top: 64px; }
+section.band h2 { font-size: 24px; letter-spacing: -.02em; margin: 8px 0 10px; font-weight: 600; }
+section.band p { max-width: 70ch; color: var(--text-2); margin: 0 0 14px; }
+section.band > h3 { font-size: 18px; letter-spacing: -.01em; margin: 34px 0 8px; font-weight: 600; }
+figure { margin: 22px 0 0; }
+.fig-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+.fig-scroll .pz { width: 100%; }
+.full .fig-scroll .pz { width: auto; max-width: none; }
+figcaption { color: var(--muted); font-size: 13px; margin-top: 12px; max-width: 80ch; }
+
+ol.seq { margin: 0; padding: 0; list-style: none; counter-reset: s; max-width: 80ch; }
+ol.seq li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 6px; padding: 9px 0; border-bottom: 1px solid var(--line); color: var(--text-2); }
+ol.seq li::before { content: counter(s); font: 500 12px/1.9 var(--mono); color: var(--muted); }
+ol.seq b { color: var(--text); font-weight: 600; }
+
+.table-scroll { overflow-x: auto; margin-top: 18px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 860px; }
+th { text-align: left; font: 500 10.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  padding: 10px 14px 10px 0; border-bottom: 1px solid var(--line-2); white-space: nowrap; }
+td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--text-2); }
+td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+td.num, td .mono, .mono { font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+td.sub { color: var(--muted); font-weight: 400; }
+.net { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.net::before { content: ""; width: 12px; height: 3px; border-radius: 2px; background: var(--c); }
+.tag { display: inline-block; font: 500 11px/1 var(--mono); padding: 3px 7px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--text-2); margin-right: 4px; }
+.tag.slerm { border-color: var(--violet); color: var(--violet); }
+.state { font: 12px var(--mono); white-space: nowrap; }
+.state::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; background: var(--text); vertical-align: 1px; }
+.state.off::before { background: none; box-shadow: inset 0 0 0 1.25px var(--text-2); }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 0 40px; margin-top: 22px; }
+.rules div { border-top: 1px solid var(--line); padding-block: 16px 18px; min-width: 0; }
+.rules h3 { font-size: 15px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+.rules p { font-size: 14px; color: var(--text-2); margin: 0; }
+ol.log { list-style: none; margin: 18px 0 0; padding: 0; max-width: 80ch; }
+ol.log li { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding-block: 11px; border-bottom: 1px solid var(--line); color: var(--text-2); }
+ol.log time { font: 500 12px/1.9 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+ol.log li.next time { color: var(--accent); }
+
+/* scroll reveal for the page around the diagrams: blocks settle out of a blur, section hairlines draw across */
+.rv-on .rv-b { opacity: 0; translate: 0 18px; filter: blur(6px); }
+.rv-on tr.rv-b { filter: none; translate: 0 10px; }
+.rv-on .rv-b.rv-go { opacity: 1; translate: 0 0; filter: blur(0);
+  transition: opacity .8s var(--ease), translate 1s var(--ease), filter .8s var(--ease); transition-delay: var(--d, 0s); }
+.rv-on section.band { border-top-color: transparent; position: relative; }
+.rv-on section.band::before { content: ""; position: absolute; inset: -1px 0 auto 0; height: 1px; background: var(--line);
+  transform-origin: 0 50%; transition: transform 1.4s var(--ease); }
+.rv-on section.band.rv-line::before { transform: scaleX(0); }
+
+.parked { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px 36px; margin-top: 26px; }
+.parked h3 { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.parked p { font-size: 13.5px; color: var(--text-2); margin: 0; }
+footer { border-top: 1px solid var(--line); padding-block: 28px 48px; color: var(--muted); font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<header class="top"><div class="wrap">
+  <div class="brand">nbdevlab <i>/</i> homelab</div>
+  <nav class="jump" aria-label="Sections">
+    <a href="#map">Map</a><a href="#slerm">slerm</a><a href="#power">Power failure</a><a href="#edge">Public edge</a>
+    <a href="#security">Security</a><a href="#hardware">Hardware</a><a href="#guests">Guests</a><a href="#changes">Changes</a>
+  </nav>
+</div></header>
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Homelab · snapshot 12 Oct 2026</div>
+    <h1>nbdevlab <span>homelab</span></h1>
+    <p class="lede">Two Proxmox servers and a bare-metal RAM node behind a WatchGuard Firebox on Starlink, with a third
+    Proxmox host parked for now. They run the house services, a SIEM, a mail gateway and slerm, a Slurm cluster
+    I built to learn Slurm end to end. Cloudflare, one Oracle VPS and Tailscale handle everything that comes in
+    from outside, and one UPS decides what happens when the power goes out.</p>
+    <div class="stats"><div class='stat'><b>3</b><span>servers + one parked</span></div><div class='stat'><b>144</b><span>CPU threads in service</span></div><div class='stat'><b>160 GB</b><span>RAM across the servers</span></div><div class='stat'><b>12 TiB</b><span>ZFS raw, two raidz1 pools</span></div><div class='stat'><b>2</b><span>GPUs · 32 GB VRAM</span></div><div class='stat' data-live='guests'><b>12</b><span>guests running of 69</span></div><div class='stat' data-live='wall-power'><b>≈432 W</b><span>at the wall · snapshot</span></div></div>
+    <div class="controls">
+      <label class="switch" for="toggle-motion"><input type="checkbox" id="toggle-motion" checked> Animate traffic</label>
+      <span class="seg-ctl" role="group" aria-label="Diagram size">
+        <button type="button" data-size="fit" aria-pressed="true">Fit width</button>
+        <button type="button" data-size="full" aria-pressed="false">Full size</button>
+      </span>
+    </div>
+  </div>
+
+  <section class="band" id="map">
+    <div class="eyebrow">01 · Topology</div>
+    <h2>The map</h2>
+    <p>Every network hangs off the Firebox. Colored lines are the four networks, and each guest's short color
+    stub says which one it sits on. Dashed lines at the top are outbound tunnels. The rails at the bottom show
+    which PSU of each server is on UPS battery.</p>
+    <figure><div class="fig-scroll"><svg class="pz " viewBox="0 0 1680 1600" width="1680" height="1600" role="img" aria-label="Homelab topology: internet services, the Firebox, four networks, three servers with their running guests, a parked fourth server, LAN devices and UPS power wiring." data-w="1680"><defs><marker id="ah-net" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="60" y="62" class="big">nbdevlab<tspan class="mu"> homelab</tspan></text><text x="60" y="90" class="sm mu">Two Proxmox hosts and a third parked · a bare-metal RAM node · the slerm Slurm cluster · Cloudflare edge · snapshot 12 Oct 2026</text><line x1="1040" y1="36" x2="1064" y2="36" class="w s-lan"/><text x="1074" y="40" class="sm f-lan">LAN · Wi-Fi</text><text x="1174" y="40" class="m xs mu">the house</text><line x1="1040" y1="56" x2="1064" y2="56" class="w s-mgmt"/><text x="1074" y="60" class="sm f-mgmt">mgmt</text><text x="1174" y="60" class="m xs mu">hypervisors</text><line x1="1040" y1="76" x2="1064" y2="76" class="w s-srv"/><text x="1074" y="80" class="sm f-srv">srv</text><text x="1174" y="80" class="m xs mu">servers</text><line x1="1040" y1="96" x2="1064" y2="96" class="w s-dmz"/><text x="1074" y="100" class="sm f-dmz">DMZ</text><text x="1174" y="100" class="m xs mu">isolated</text><circle cx="1334" cy="36" r="3.5" class="st-run" style="animation-delay:-1.37s"/><text x="1344" y="40" class="sm">running</text><circle cx="1414" cy="36" r="3.5" class="st-off"/><text x="1424" y="40" class="sm">off until needed</text><rect x="1332" y="49" width="42" height="15" rx="7.5" class="pill p-slerm"/><text x="1353" y="60" class="m xs pt-slerm" text-anchor="middle">slerm</text><text x="1382" y="60" class="sm">slerm cluster node</text><rect x="1394" y="69" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="1406" y="80" class="m xs pt-tun" text-anchor="middle">ts</text><rect x="1365" y="69" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="1377" y="80" class="m xs pt-tun" text-anchor="middle">wg</text><rect x="1336" y="69" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="1348" y="80" class="m xs pt-tun" text-anchor="middle">cf</text><text x="1426" y="80" class="sm">outbound tunnel from here</text><line x1="1330" y1="96" x2="1354" y2="96" class="pw-b"/><text x="1362" y="100" class="sm">battery outlet</text><line x1="1462" y1="96" x2="1486" y2="96" class="pw-s"/><text x="1494" y="100" class="sm">surge only</text><text x="30" y="214" class="ey" text-anchor="middle" transform="rotate(-90 30 214)">INTERNET</text><rect x="60" y="132" width="372" height="164" rx="10" class="card"/><text x="76" y="156" class="ey">CLOUDFLARE · PRO ZONE</text><text x="76" y="180" class="ti">nbdevlab.com</text><text x="76" y="206" class="sm">DNS · WAF · Zero Trust Access for admin UIs</text><text x="76" y="225" class="sm">Worker nbdevlab serves the website</text><text x="76" y="244" class="sm">   D1 content · R2 images · GA4 after consent</text><text x="76" y="263" class="sm">Tunnel from byteme2 · cloudflared on the host</text><text x="76" y="282" class="sm">Tunnel from the server network · on CFT</text><line x1="246" y1="296" x2="246" y2="328" class="nt dash"/><text x="254" y="316" class="m xs mu">2 tunnels</text><rect x="456" y="132" width="372" height="164" rx="10" class="card"/><text x="472" y="156" class="ey">ORACLE CLOUD VPS · AMPERE A1</text><text x="472" y="180" class="ti">public relay</text><text x="472" y="206" class="sm">4 Arm cores · 24 GB · Ubuntu</text><text x="472" y="225" class="sm">Caddy + Let&#x27;s Encrypt in front of Jellyfin</text><text x="472" y="244" class="sm">WireGuard hub with two locked-down peers</text><text x="472" y="263" class="sm">   Jellyfin · Wazuh agent traffic only</text><text x="472" y="282" class="sm">fail2ban · watched by Wazuh</text><line x1="642" y1="296" x2="642" y2="328" class="nt dash"/><text x="650" y="316" class="m xs mu">WireGuard ×2</text><rect x="852" y="132" width="372" height="164" rx="10" class="card"/><text x="868" y="156" class="ey">TAILSCALE</text><text x="868" y="180" class="ti">tailnet</text><text x="868" y="206" class="sm">byteme2 · subnet router + exit node</text><text x="868" y="225" class="sm">CFT · routes the Wi-Fi and server networks</text><text x="868" y="244" class="sm">Home Assistant · exit node</text><text x="868" y="263" class="sm">tailnet DNS → Technitium</text><text x="868" y="282" class="sm">also Wuzah · Ghost · Cyclops · phone</text><line x1="1038" y1="296" x2="1038" y2="328" class="nt dash"/><text x="1046" y="316" class="m xs mu">4 lab nodes</text><rect x="1248" y="132" width="372" height="164" rx="10" class="card"/><text x="1264" y="156" class="ey">UPSTREAM</text><text x="1264" y="180" class="ti">what the lab calls out to</text><text x="1264" y="206" class="sm">WeatherFlow ← Tempest readings</text><text x="1264" y="225" class="sm">Brevo ← outbound mail relay from PMG</text><text x="1264" y="244" class="sm">GitHub ← code for the Pi wall</text><text x="1264" y="263" class="sm">Hugging Face ← slerm model downloads</text><text x="1264" y="282" class="sm">Let&#x27;s Encrypt ← certificates for the VPS</text><line x1="1434" y1="296" x2="1434" y2="328" class="nt"/><text x="1442" y="316" class="m xs mu">HTTPS</text><line x1="246" y1="328" x2="1434" y2="328" class="nt"/><text x="30" y="450" class="ey" text-anchor="middle" transform="rotate(-90 30 450)">EDGE</text><line x1="840" y1="328" x2="840" y2="346" class="nt"/><rect x="755" y="346" width="170" height="24" rx="12" class="pill p-tun"/><text x="840" y="362" class="m sm" text-anchor="middle">Starlink · double NAT</text><line x1="840" y1="370" x2="840" y2="404" class="nt"/><rect x="520" y="404" width="640" height="90" rx="10" class="card card-hi"/><text x="536" y="428" class="ey">EDGE FIREWALL · ROUTER · GATEWAY FOR EVERY SEGMENT</text><text x="536" y="454" class="ti">WatchGuard Firebox M400</text><text x="536" y="476" class="m xs mu">Policies between every segment · the DMZ is its own zone · VLAN trunk to byteme2</text><text x="30" y="587" class="ey" text-anchor="middle" transform="rotate(-90 30 587)">NETWORKS</text><text x="60" y="552" class="sm"><tspan class="f-lan">LAN · Wi-Fi</tspan><tspan class="m xs mu">  the house</tspan></text><line x1="236" y1="548" x2="1508" y2="548" class="w s-lan"/><text x="60" y="578" class="sm"><tspan class="f-mgmt">mgmt</tspan><tspan class="m xs mu">  hypervisors</tspan></text><line x1="236" y1="574" x2="798" y2="574" class="w s-mgmt"/><text x="60" y="604" class="sm"><tspan class="f-srv">srv</tspan><tspan class="m xs mu">  servers</tspan></text><line x1="236" y1="600" x2="1240" y2="600" class="w s-srv"/><text x="60" y="630" class="sm"><tspan class="f-dmz">DMZ</tspan><tspan class="m xs mu">  isolated</tspan></text><line x1="236" y1="626" x2="974" y2="626" class="w s-dmz"/><line x1="600" y1="494" x2="600" y2="548" class="w s-lan"/><circle cx="600" cy="548" r="3" class="f-lan"/><rect x="596" y="490" width="8" height="8" rx="2" class="f-lan"/><line x1="720" y1="494" x2="720" y2="568" class="halo"/><line x1="720" y1="494" x2="720" y2="574" class="w s-mgmt"/><circle cx="720" cy="574" r="3" class="f-mgmt"/><rect x="716" y="490" width="8" height="8" rx="2" class="f-mgmt"/><line x1="840" y1="494" x2="840" y2="594" class="halo"/><line x1="840" y1="494" x2="840" y2="600" class="w s-srv"/><circle cx="840" cy="600" r="3" class="f-srv"/><rect x="836" y="490" width="8" height="8" rx="2" class="f-srv"/><line x1="960" y1="494" x2="960" y2="620" class="halo"/><line x1="960" y1="494" x2="960" y2="626" class="w s-dmz"/><circle cx="960" cy="626" r="3" class="f-dmz"/><rect x="956" y="490" width="8" height="8" rx="2" class="f-dmz"/><line x1="280" y1="554" x2="280" y2="690" class="halo"/><line x1="280" y1="548" x2="280" y2="690" class="w s-lan"/><circle cx="280" cy="548" r="3" class="f-lan"/><rect x="276" y="686" width="8" height="8" rx="2" class="f-lan"/><text x="280" y="716" class="m xs mu" text-anchor="middle">LAN</text><line x1="350" y1="580" x2="350" y2="690" class="halo"/><line x1="350" y1="574" x2="350" y2="690" class="w s-mgmt"/><circle cx="350" cy="574" r="3" class="f-mgmt"/><rect x="346" y="686" width="8" height="8" rx="2" class="f-mgmt"/><text x="350" y="716" class="m xs mu" text-anchor="middle">mgmt</text><line x1="420" y1="606" x2="420" y2="690" class="halo"/><line x1="420" y1="600" x2="420" y2="690" class="w s-srv"/><circle cx="420" cy="600" r="3" class="f-srv"/><rect x="416" y="686" width="8" height="8" rx="2" class="f-srv"/><text x="420" y="716" class="m xs mu" text-anchor="middle">srv</text><line x1="490" y1="632" x2="490" y2="690" class="halo"/><line x1="490" y1="626" x2="490" y2="690" class="w s-dmz"/><circle cx="490" cy="626" r="3" class="f-dmz"/><rect x="486" y="686" width="8" height="8" rx="2" class="f-dmz"/><text x="490" y="716" class="m xs mu" text-anchor="middle">DMZ</text><line x1="560" y1="606" x2="560" y2="690" class="halo"/><line x1="560" y1="600" x2="560" y2="690" class="w s-srv"/><circle cx="560" cy="600" r="3" class="f-srv"/><rect x="556" y="686" width="8" height="8" rx="2" class="f-srv"/><text x="560" y="716" class="m xs mu" text-anchor="middle">iLO</text><line x1="784" y1="580" x2="784" y2="690" class="halo"/><line x1="784" y1="574" x2="784" y2="690" class="w s-mgmt"/><circle cx="784" cy="574" r="3" class="f-mgmt"/><rect x="780" y="686" width="8" height="8" rx="2" class="f-mgmt"/><text x="784" y="716" class="m xs mu" text-anchor="middle">mgmt + iDRAC</text><line x1="874" y1="606" x2="874" y2="690" class="halo"/><line x1="874" y1="600" x2="874" y2="690" class="w s-srv"/><circle cx="874" cy="600" r="3" class="f-srv"/><rect x="870" y="686" width="8" height="8" rx="2" class="f-srv"/><text x="874" y="716" class="m xs mu" text-anchor="middle">srv</text><line x1="1226" y1="606" x2="1226" y2="690" class="halo"/><line x1="1226" y1="600" x2="1226" y2="690" class="w s-srv"/><circle cx="1226" cy="600" r="3" class="f-srv"/><rect x="1222" y="686" width="8" height="8" rx="2" class="f-srv"/><text x="1226" y="716" class="m xs mu" text-anchor="middle">srv + BMC</text><line x1="1494" y1="554" x2="1494" y2="690" class="halo"/><line x1="1494" y1="548" x2="1494" y2="690" class="w s-lan"/><circle cx="1494" cy="548" r="3" class="f-lan"/><rect x="1490" y="686" width="8" height="8" rx="2" class="f-lan"/><text x="1494" y="716" class="m xs mu" text-anchor="middle">Wi-Fi AP</text><text x="30" y="1000" class="ey" text-anchor="middle" transform="rotate(-90 30 1000)">HOSTS</text><line x1="61" y1="738" x2="619" y2="738" class="hr"/><text x="76" y="760" class="ey">PROXMOX VE · HP PROLIANT DL360 GEN9</text><text x="76" y="784" class="ti">byteme2</text><text x="76" y="804" class="m xs">2× Xeon E5-2683 v4 · 32C/64T · 64 GB RAM</text><text x="76" y="821" class="m xs">ZFS raidz1 5× 1.2 TB SAS · 2× 1 TB SSD · 4× 1 GbE</text><line x1="61" y1="836" x2="619" y2="836" class="hr"/><circle cx="80" cy="858" r="3.5" class="st-run" style="animation-delay:-2.74s"/><text x="92" y="862" class="nm">Technitium</text><line x1="592" y1="858" x2="604" y2="858" class="stub s-srv"/><text x="196" y="862" class="m xs mu">CT</text><text x="224" y="862" class="sm">DNS · DHCP for Wi-Fi</text><circle cx="80" cy="884" r="3.5" class="st-run" style="animation-delay:-0.51s"/><text x="92" y="888" class="nm">CFT</text><line x1="592" y1="884" x2="604" y2="884" class="stub s-srv"/><rect x="558" y="877" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="570" y="888" class="m xs pt-tun" text-anchor="middle">ts</text><rect x="529" y="877" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="541" y="888" class="m xs pt-tun" text-anchor="middle">cf</text><text x="196" y="888" class="m xs mu">VM</text><text x="224" y="888" class="sm">tailnet router · CF tunnel</text><circle cx="80" cy="910" r="3.5" class="st-run" style="animation-delay:-1.88s"/><text x="92" y="914" class="nm">PMG</text><line x1="592" y1="910" x2="604" y2="910" class="stub s-mgmt"/><text x="196" y="914" class="m xs mu">CT</text><text x="224" y="914" class="sm">mail gateway → Brevo</text><circle cx="80" cy="936" r="3.5" class="st-run" style="animation-delay:-3.25s"/><text x="92" y="940" class="nm">Wuzah</text><line x1="592" y1="936" x2="604" y2="936" class="stub s-srv"/><rect x="558" y="929" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="570" y="940" class="m xs pt-tun" text-anchor="middle">ts</text><rect x="529" y="929" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="541" y="940" class="m xs pt-tun" text-anchor="middle">wg</text><text x="196" y="940" class="m xs mu">VM</text><text x="224" y="940" class="sm">Wazuh SIEM</text><circle cx="80" cy="962" r="3.5" class="st-run" style="animation-delay:-1.02s"/><text x="92" y="966" class="nm">psql</text><line x1="592" y1="962" x2="604" y2="962" class="stub s-srv"/><text x="196" y="966" class="m xs mu">CT</text><text x="224" y="966" class="sm">PostgreSQL</text><circle cx="80" cy="988" r="3.5" class="st-run" style="animation-delay:-2.39s"/><text x="92" y="992" class="nm">HA</text><line x1="592" y1="988" x2="604" y2="988" class="stub s-srv"/><rect x="558" y="981" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="570" y="992" class="m xs pt-tun" text-anchor="middle">ts</text><text x="196" y="992" class="m xs mu">VM</text><text x="224" y="992" class="sm">Home Assistant OS</text><circle cx="80" cy="1014" r="3.5" class="st-run" style="animation-delay:-0.16s"/><text x="92" y="1018" class="nm">nextcloud</text><line x1="592" y1="1014" x2="604" y2="1014" class="stub s-srv"/><text x="196" y="1018" class="m xs mu">CT</text><text x="224" y="1018" class="sm">Nextcloud · 1.4 TB</text><circle cx="80" cy="1040" r="3.5" class="st-run" style="animation-delay:-1.53s"/><text x="92" y="1044" class="nm">Jellyfin</text><line x1="592" y1="1040" x2="604" y2="1040" class="stub s-dmz"/><rect x="558" y="1033" width="24" height="15" rx="7.5" class="pill p-tun"/><text x="570" y="1044" class="m xs pt-tun" text-anchor="middle">wg</text><text x="196" y="1044" class="m xs mu">VM</text><text x="224" y="1044" class="sm">media server</text><circle cx="80" cy="1066" r="3.5" class="st-run" style="animation-delay:-2.90s"/><text x="92" y="1070" class="nm">Cryo-Ai</text><line x1="592" y1="1066" x2="604" y2="1066" class="stub s-srv"/><text x="196" y="1070" class="m xs mu">VM</text><text x="224" y="1070" class="sm">Open WebUI · Ollama</text><circle cx="80" cy="1092" r="3.5" class="st-run" style="animation-delay:-0.67s"/><text x="92" y="1096" class="nm">MCP</text><line x1="592" y1="1092" x2="604" y2="1092" class="stub s-srv"/><text x="196" y="1096" class="m xs mu">CT</text><text x="224" y="1096" class="sm">mcpo · SearXNG</text><circle cx="80" cy="1118" r="3.5" class="st-run" style="animation-delay:-2.04s"/><text x="92" y="1122" class="nm">AI-Sandbox</text><line x1="592" y1="1118" x2="604" y2="1118" class="stub s-srv"/><text x="196" y="1122" class="m xs mu">VM</text><text x="224" y="1122" class="sm">computer-use and coding agents</text><circle cx="80" cy="1144" r="3.5" class="st-off"/><text x="92" y="1148" class="nm">slerm-node01</text><line x1="592" y1="1144" x2="604" y2="1144" class="stub s-srv"/><rect x="540" y="1137" width="42" height="15" rx="7.5" class="pill p-slerm"/><text x="561" y="1148" class="m xs pt-slerm" text-anchor="middle">slerm</text><text x="196" y="1148" class="m xs mu">VM</text><text x="224" y="1148" class="sm">CPU worker · 16c 12 GB</text><circle cx="80" cy="1170" r="3.5" class="st-off"/><text x="92" y="1174" class="nm">slerm-node02</text><line x1="592" y1="1170" x2="604" y2="1170" class="stub s-srv"/><rect x="540" y="1163" width="42" height="15" rx="7.5" class="pill p-slerm"/><text x="561" y="1174" class="m xs pt-slerm" text-anchor="middle">slerm</text><text x="196" y="1174" class="m xs mu">VM</text><text x="224" y="1174" class="sm">CPU worker · 16c 12 GB</text><line x1="61" y1="1194" x2="619" y2="1194" class="hr"/><text x="76" y="1216" class="sm mu">+41 more guests defined but stopped</text><text x="76" y="1240" class="sm">On the host: cloudflared · Tailscale subnet router + exit node</text><text x="76" y="1258" class="sm">UPS dashboard · ups-guardian · fob API · Wazuh agent</text><line x1="61" y1="1276" x2="619" y2="1276" class="hr"/><text x="200" y="1298" class="m xs tx" text-anchor="middle">PSU1 · 5 W</text><text x="480" y="1298" class="m xs tx" text-anchor="middle">PSU2 · 150 W</text><rect x="196" y="1308" width="8" height="8" rx="2" class="psu"/><rect x="476" y="1308" width="8" height="8" rx="2" class="psu"/><rect x="60" y="690" width="560" height="622" rx="10" class="card frame"/><line x1="645" y1="738" x2="1083" y2="738" class="hr"/><text x="660" y="760" class="ey">PROXMOX VE · DELL POWEREDGE R730</text><text x="660" y="784" class="ti">byteme</text><text x="660" y="804" class="m xs">2× Xeon E5-2695 v4 · 36C/72T · 64 GB RAM</text><text x="660" y="821" class="m xs">ZFS raidz1 6× 1.2 TB SAS · btrfs RAID1 boot</text><line x1="645" y1="836" x2="1083" y2="836" class="hr"/><circle cx="664" cy="858" r="3.5" class="st-run" style="animation-delay:-3.41s"/><text x="676" y="862" class="nm">slerm-head</text><line x1="1056" y1="858" x2="1068" y2="858" class="stub s-srv"/><rect x="1004" y="851" width="42" height="15" rx="7.5" class="pill p-slerm"/><text x="1025" y="862" class="m xs pt-slerm" text-anchor="middle">slerm</text><text x="676" y="879" class="sm mu">VM · Slurm · NFS · LLM gateway</text><circle cx="664" cy="902" r="3.5" class="st-off"/><text x="676" y="906" class="nm">slerm-node04</text><line x1="1056" y1="902" x2="1068" y2="902" class="stub s-srv"/><rect x="1004" y="895" width="42" height="15" rx="7.5" class="pill p-slerm"/><text x="1025" y="906" class="m xs pt-slerm" text-anchor="middle">slerm</text><text x="676" y="923" class="sm mu">VM · 2× Tesla P100 · LLM router</text><line x1="645" y1="936" x2="1083" y2="936" class="hr"/><text x="660" y="958" class="ey">PCIE PASSTHROUGH</text><text x="660" y="980" class="m xs">82:00  Tesla P100 · 16 GB · Pascal  → node04</text><text x="660" y="998" class="m xs">04:00  Tesla P100 · 16 GB · Pascal  → node04</text><text x="660" y="1020" class="sm mu">Both cards since 4 Oct · 32 GB of VRAM in one VM</text><line x1="645" y1="1036" x2="1083" y2="1036" class="hr"/><text x="660" y="1058" class="sm">The cards are passive, so the chassis fans cool</text><text x="660" y="1076" class="sm">them. The iDRAC ramps the fans on its own.</text><text x="660" y="1100" class="sm mu">+13 more guests defined but stopped</text><line x1="645" y1="1118" x2="1083" y2="1118" class="hr"/><text x="754" y="1140" class="m xs tx" text-anchor="middle">PSU1 · 168 W</text><text x="974" y="1140" class="m xs tx" text-anchor="middle">PSU2 · 24 W</text><rect x="750" y="1150" width="8" height="8" rx="2" class="psu"/><rect x="970" y="1150" width="8" height="8" rx="2" class="psu"/><rect x="644" y="690" width="440" height="464" rx="10" class="card frame"/><line x1="1109" y1="738" x2="1343" y2="738" class="hr"/><text x="1124" y="760" class="ey">BARE METAL · INTEL S1600JP</text><text x="1124" y="784" class="ti">deadlock</text><text x="1124" y="804" class="m xs">Xeon E5-1620 v2 · 4C/8T</text><text x="1124" y="821" class="m xs">32 GB RAM · 2.6 TB local</text><line x1="1109" y1="836" x2="1343" y2="836" class="hr"/><circle cx="1128" cy="858" r="3.5" class="st-off"/><text x="1140" y="862" class="nm">slerm-node05</text><rect x="1286" y="851" width="42" height="15" rx="7.5" class="pill p-slerm"/><text x="1307" y="862" class="m xs pt-slerm" text-anchor="middle">slerm</text><text x="1140" y="880" class="sm mu">CPU worker · the RAM node</text><text x="1140" y="898" class="sm mu">powers off when idle, the</text><text x="1140" y="916" class="sm mu">BMC wakes it on demand</text><line x1="1109" y1="934" x2="1343" y2="934" class="hr"/><text x="1168" y="956" class="m xs tx" text-anchor="middle">PSU1 · 6 W</text><text x="1284" y="956" class="m xs tx" text-anchor="middle">PSU2 · 0 W</text><rect x="1164" y="966" width="8" height="8" rx="2" class="psu"/><rect x="1280" y="966" width="8" height="8" rx="2" class="psu"/><rect x="1108" y="690" width="236" height="280" rx="10" class="card frame"/><line x1="1369" y1="738" x2="1619" y2="738" class="hr"/><text x="1384" y="760" class="ey">THE HOUSE · DHCP FROM TECHNITIUM</text><text x="1384" y="784" class="ti">Wi-Fi + LAN</text><line x1="1369" y1="800" x2="1619" y2="800" class="hr"/><text x="1384" y="826" class="nm">Linksys router</text><text x="1384" y="843" class="sm mu">AP mode only · Wi-Fi for the house</text><text x="1384" y="868" class="nm">Mesh extender</text><text x="1384" y="885" class="sm mu">one node, meshed to the Linksys</text><line x1="1369" y1="896" x2="1619" y2="896" class="hr"/><text x="1384" y="920" class="nm">Raspberry Pi 3B</text><text x="1384" y="937" class="sm mu">wall kiosk · status API for the site</text><text x="1384" y="962" class="nm">Ghost</text><text x="1384" y="979" class="sm mu">Arch laptop · syncs to Nextcloud</text><text x="1384" y="1004" class="nm">Cyclops</text><text x="1384" y="1021" class="sm mu">Windows · LM Studio embeddings</text><text x="1384" y="1046" class="nm">Cube Pro</text><text x="1384" y="1063" class="sm mu">3D printer · Klipper</text><text x="1384" y="1088" class="nm">Tempest</text><text x="1384" y="1105" class="sm mu">weather station → WeatherFlow</text><text x="1384" y="1130" class="nm">ESP8266 fob</text><text x="1384" y="1147" class="sm mu">OLED status fob ← byteme2</text><rect x="1368" y="690" width="252" height="468" rx="10" class="card frame"/><text x="1384" y="1202" class="ey">PARKED · HP PROLIANT DL380 GEN9</text><text x="1384" y="1226" class="ti">byteme3</text><text x="1384" y="1248" class="m xs">2× Xeon E5-2690 v3 · 24C/48T</text><text x="1384" y="1265" class="m xs">ZFS raidz2 6× 1.2 TB SAS</text><text x="1384" y="1287" class="sm mu">Third Proxmox host, off for now:</text><text x="1384" y="1304" class="sm mu">its memory went into byteme.</text><text x="1384" y="1321" class="sm mu">Holds slerm-node03.</text><rect x="1368" y="1178" width="252" height="158" rx="10" class="card frame parked-card"/><text x="30" y="1422" class="ey" text-anchor="middle" transform="rotate(-90 30 1422)">POWER</text><line x1="200" y1="1356" x2="1284" y2="1356" class="pw-b"/><line x1="480" y1="1378" x2="1168" y2="1378" class="pw-s"/><line x1="200" y1="1316" x2="200" y2="1356" class="pw-b"/><line x1="480" y1="1318" x2="480" y2="1372" class="halo"/><line x1="480" y1="1316" x2="480" y2="1378" class="pw-s"/><line x1="754" y1="1160" x2="754" y2="1372" class="halo"/><line x1="754" y1="1158" x2="754" y2="1378" class="pw-s"/><line x1="974" y1="1158" x2="974" y2="1356" class="pw-b"/><line x1="1168" y1="976" x2="1168" y2="1372" class="halo"/><line x1="1168" y1="974" x2="1168" y2="1378" class="pw-s"/><line x1="1284" y1="974" x2="1284" y2="1356" class="pw-b"/><line x1="640" y1="1362" x2="640" y2="1424" class="halo"/><line x1="640" y1="1356" x2="640" y2="1424" class="pw-b"/><line x1="860" y1="1378" x2="860" y2="1424" class="pw-s"/><text x="648" y="1412" class="xs mu">battery outlets</text><text x="868" y="1412" class="xs mu">surge-only outlets</text><rect x="500" y="1424" width="500" height="92" rx="10" class="card card-hi"/><text x="516" y="1448" class="ey">UPS · USB TO BYTEME2</text><text x="516" y="1474" class="ti">CyberPower LX1500GAVR</text><text x="516" y="1498" class="m xs">1500 VA / 900 W · 108 W now (12%) · ~64 min at this load</text><line x1="360" y1="1470" x2="498" y2="1470" class="nt" marker-end="url(#ah-net)"/><text x="360" y="1462" class="m xs mu">mains 120 V</text><text x="1040" y="1428" class="sm">One PSU of each server sits on battery, the other on surge-only.</text><text x="1040" y="1447" class="sm">On battery, ups-guardian on byteme2 shuts its guests down and</text><text x="1040" y="1466" class="sm">powers byteme off through the iDRAC and deadlock through its BMC.</text><text x="1040" y="1485" class="sm">DNS and the tailnet router stay up; byteme2 caps itself at 107 W.</text><text x="1040" y="1504" class="sm">Starlink stays up after byteme2 halts, so Wi-Fi lasts a while longer.</text><text x="1040" y="1523" class="sm">When mains return, everything that was running comes back.</text><text x="1040" y="1548" class="sm mu">Total draw now ≈ 432 W: 108 W through the UPS + 324 W on surge-only.</text><g class="pk" data-legs="246,296 246,328 840,328 840,346;840,370 840,404;840,494 840,600 420,600 420,690" data-c="text text srv" data-speed="120" data-delay="0" data-rest="4" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="642,296 642,328 840,328 840,346;840,370 840,404;960,494 960,626 490,626 490,690" data-c="text text dmz" data-speed="120" data-delay="2.2" data-rest="4" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="1038,296 1038,328 840,328 840,346;840,370 840,404;720,494 720,574 350,574 350,690" data-c="text text mgmt" data-speed="120" data-delay="4.6" data-rest="4" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="1494,690 1494,548 600,548 600,494;840,404 840,370;840,346 840,328 1434,328 1434,296" data-c="lan text text" data-speed="120" data-delay="6.4" data-rest="3.5" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="1494,690 1494,548 600,548 600,494;840,494 840,600 420,600 420,690" data-c="lan srv" data-speed="120" data-delay="1.3" data-rest="5" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="420,690 420,600 874,600 874,690" data-c="violet" data-speed="120" data-delay="3.1" data-rest="2.5" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="350,690 350,574 784,574 784,690" data-c="mgmt" data-speed="120" data-delay="5.5" data-rest="7" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="360,1470 498,1470" data-c="power" data-speed="70" data-delay="0" data-rest="0.6" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="640,1424 640,1356 200,1356 200,1316" data-c="power" data-speed="70" data-delay="0" data-rest="1.2" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="640,1424 640,1356 200,1356 200,1316" data-c="power" data-speed="70" data-delay="3.3" data-rest="1.2" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="640,1424 640,1356 974,1356 974,1158" data-c="power" data-speed="70" data-delay="1.1" data-rest="1.2" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="640,1424 640,1356 974,1356 974,1158" data-c="power" data-speed="70" data-delay="4.4" data-rest="1.2" data-hold="0.15"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g></svg></div><figcaption>Internet services, the edge, four networks, three servers with their running guests, a parked fourth, LAN devices and UPS wiring. The moving dots trace typical paths, such as a site visitor&#x27;s status request reaching CFT or a stream reaching Jellyfin. They are examples, not live traffic.</figcaption></figure>
+  </section>
+
+  <section class="band" id="slerm">
+    <div class="eyebrow">02 · Cluster</div>
+    <h2>slerm</h2>
+    <p>slerm is a Slurm cluster made of VMs on the Proxmox servers plus deadlock, built to learn Slurm end to end.
+    The head runs Slurm, a control panel that submits and schedules jobs, and the NFS share every node mounts.
+    Everything else is a Slurm job: NOAA radar processing, Wazuh alert analysis, software builds and local LLM
+    serving.</p>
+    <figure><div class="fig-scroll"><svg class="pz " viewBox="0 0 1680 756" width="1680" height="756" role="img" aria-label="slerm workloads: Slurm on slerm-head runs NOAA radar processing, Wazuh alert analysis, LLM serving and software builds as jobs on the compute and gpu partitions." data-w="1680"><defs><marker id="ah-slerm-work" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="60" y="62" class="big">slerm<tspan class="mu"> workloads</tspan></text><text x="60" y="90" class="sm mu">Slurm · five nodes on four machines · every workload is a Slurm job, submitted from the head</text><circle cx="1334" cy="36" r="3.5" class="st-run" style="animation-delay:-1.37s"/><text x="1344" y="40" class="sm">running now</text><circle cx="1444" cy="36" r="3.5" class="st-off"/><text x="1454" y="40" class="sm">powered off until needed</text><text x="76" y="164" class="ey">VM ON BYTEME · ROCKY LINUX · 2 vCPU · 4 GB</text><circle cx="80" cy="186" r="3.5" class="st-run" style="animation-delay:-2.74s"/><text x="92" y="190" class="ti">slerm-head</text><line x1="61" y1="208" x2="439" y2="208" class="hr"/><text x="76" y="236" class="nm">Slurm</text><text x="188" y="236" class="sm">slurmctld + slurmdbd on MariaDB</text><text x="76" y="280" class="nm">panel</text><text x="188" y="280" class="sm">submits, schedules and watches jobs</text><line x1="76" y1="254" x2="424" y2="254" class="hr"/><text x="76" y="324" class="nm">slerm-orch</text><text x="188" y="324" class="sm">LLM gateway · powers nodes</text><line x1="76" y1="298" x2="424" y2="298" class="hr"/><text x="76" y="368" class="nm">NFS · 700 GB</text><text x="188" y="368" class="sm">data, apps and home directories</text><line x1="76" y1="342" x2="424" y2="342" class="hr"/><rect x="60" y="140" width="380" height="258" rx="10" class="card frame"/><text x="60" y="442" class="ey">PARTITIONS</text><rect x="60" y="458" width="380" height="132" rx="10" class="card frame"/><text x="76" y="484" class="nm">compute</text><circle cx="80" cy="506" r="3.5" class="st-off"/><text x="92" y="510" class="sm tx">node01</text><text x="164" y="510" class="sm mu">byteme2 · 16 vCPU · 12 GB</text><circle cx="80" cy="528" r="3.5" class="st-off"/><text x="92" y="532" class="sm tx">node02</text><text x="164" y="532" class="sm mu">byteme2 · 16 vCPU · 12 GB</text><circle cx="80" cy="550" r="3.5" class="st-off"/><text x="92" y="554" class="sm tx">node05</text><text x="164" y="554" class="sm mu">deadlock · 8 threads · 32 GB</text><circle cx="80" cy="572" r="3.5" class="st-off"/><text x="92" y="576" class="sm tx">node03</text><text x="164" y="576" class="sm mu">byteme3 · 24 vCPU · 20 GB · parked</text><rect x="60" y="604" width="380" height="66" rx="10" class="card frame"/><text x="76" y="630" class="nm">gpu</text><circle cx="80" cy="652" r="3.5" class="st-off"/><text x="92" y="656" class="sm tx">node04</text><text x="164" y="656" class="sm mu">byteme · 36 vCPU · 45 GB</text><text x="520" y="144" class="ey">SOURCE</text><text x="904" y="144" class="ey">SLURM JOB</text><text x="1288" y="144" class="ey">RESULT</text><text x="520" y="184" class="nm">NOAA radar<tspan class="mu">  ·  storms and wind, scan by scan</tspan></text><rect x="520" y="196" width="350" height="92" rx="10" class="card frame"/><text x="536" y="222" class="nm">NOAA open data</text><text x="536" y="244" class="sm">NEXRAD Level II radar scans</text><text x="536" y="263" class="sm mu">HRRR wind analysis</text><rect x="904" y="196" width="350" height="92" rx="10" class="card frame"/><text x="920" y="222" class="nm">Array job, one task per scan</text><text x="920" y="244" class="sm">Py-ART decode + matplotlib, CPU only</text><rect x="920" y="260" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="947" y="271" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="979" y="260" width="30" height="15" rx="7.5" class="pill p-tun"/><text x="994" y="271" class="m xs pt-tun" text-anchor="middle">gpu</text><rect x="1288" y="196" width="350" height="92" rx="10" class="card frame"/><text x="1304" y="222" class="nm">Five products as GIF loops</text><text x="1304" y="244" class="sm">reflectivity · rotation · storm cells</text><text x="1304" y="263" class="sm mu">wind profiles · US wind · the lab wall radar</text><line x1="874" y1="242" x2="898" y2="242" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="1258" y1="242" x2="1282" y2="242" class="nt" marker-end="url(#ah-slerm-work)"/><text x="520" y="320" class="nm">Wazuh analysis<tspan class="mu">  ·  security alerts against their own baseline</tspan></text><rect x="520" y="332" width="350" height="92" rx="10" class="card frame"/><text x="536" y="358" class="nm">Wuzah, the home Wazuh manager</text><text x="536" y="380" class="sm">alert snapshot saved as JSONL</text><text x="536" y="399" class="sm mu">or a CSV export dropped into the panel</text><rect x="904" y="332" width="350" height="92" rx="10" class="card frame"/><text x="920" y="358" class="nm">Array of counter shards</text><text x="920" y="380" class="sm">then one dependent job reduces them</text><rect x="920" y="396" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="947" y="407" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="1288" y="332" width="350" height="92" rx="10" class="card frame"/><text x="1304" y="358" class="nm">Report of detector findings</text><text x="1304" y="380" class="sm">one baseline over the whole window</text><text x="1304" y="399" class="sm mu">AI triage on the LLM router</text><line x1="874" y1="378" x2="898" y2="378" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="1258" y1="378" x2="1282" y2="378" class="nt" marker-end="url(#ah-slerm-work)"/><text x="520" y="456" class="nm">LLM serving<tspan class="mu">  ·  local models behind one OpenAI-style endpoint</tspan></text><rect x="520" y="468" width="350" height="92" rx="10" class="card frame"/><text x="536" y="494" class="nm">Open WebUI, opencode, agents</text><text x="536" y="516" class="sm">zsh-ai, Firstlook, Wazuh triage</text><text x="536" y="535" class="sm mu">all through the gateway on the head</text><rect x="904" y="468" width="350" height="92" rx="10" class="card frame"/><text x="920" y="494" class="nm">llama.cpp router job on node04</text><text x="920" y="516" class="sm">both P100s · CPU workers on demand</text><rect x="920" y="532" width="30" height="15" rx="7.5" class="pill p-tun"/><text x="935" y="543" class="m xs pt-tun" text-anchor="middle">gpu</text><rect x="1288" y="468" width="350" height="92" rx="10" class="card frame"/><text x="1304" y="494" class="nm">Answers back through the gateway</text><text x="1304" y="516" class="sm">nodes power off when nothing asks</text><text x="1304" y="535" class="sm mu">in detail in the next diagram</text><line x1="874" y1="514" x2="898" y2="514" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="1258" y1="514" x2="1282" y2="514" class="nt" marker-end="url(#ah-slerm-work)"/><text x="520" y="592" class="nm">Builds<tspan class="mu">  ·  software compiled on the nodes that run it</tspan></text><rect x="520" y="604" width="350" height="92" rx="10" class="card frame"/><text x="536" y="630" class="nm">Source on the shared NFS</text><text x="536" y="652" class="sm">llama.cpp with the P100 patches</text><text x="536" y="671" class="sm mu">desktop apps packaged as AppImages</text><rect x="904" y="604" width="350" height="92" rx="10" class="card frame"/><text x="920" y="630" class="nm">Build and test jobs</text><text x="920" y="652" class="sm">CUDA builds and P100 tests need the cards</text><rect x="920" y="668" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="947" y="679" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="979" y="668" width="30" height="15" rx="7.5" class="pill p-tun"/><text x="994" y="679" class="m xs pt-tun" text-anchor="middle">gpu</text><rect x="1288" y="604" width="350" height="92" rx="10" class="card frame"/><text x="1304" y="630" class="nm">Binaries back on the NFS</text><text x="1304" y="652" class="sm">router builds tuned for Pascal</text><text x="1304" y="671" class="sm mu">AppImages for the desktop</text><line x1="874" y1="650" x2="898" y2="650" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="1258" y1="650" x2="1282" y2="650" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="440" y1="232" x2="486" y2="232" class="req"/><line x1="486" y1="232" x2="486" y2="588" class="req"/><line x1="486" y1="180" x2="510" y2="180" class="req" marker-end="url(#ah-slerm-work)"/><line x1="486" y1="316" x2="510" y2="316" class="req" marker-end="url(#ah-slerm-work)"/><line x1="486" y1="452" x2="510" y2="452" class="req" marker-end="url(#ah-slerm-work)"/><line x1="486" y1="588" x2="510" y2="588" class="req" marker-end="url(#ah-slerm-work)"/><text x="60" y="726" class="sm">Every workload is an ordinary Slurm job, so they share the nodes and Slurm keeps their CPU, memory and GPU requests apart. Radar arrays ask for no GPU, so the LLM router can still get both cards.</text><g class="pk" data-legs="874,242 898,242;1258,242 1282,242" data-c="violet violet" data-speed="90" data-delay="0" data-rest="6" data-hold="0.5"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="874,378 898,378;1258,378 1282,378" data-c="violet violet" data-speed="90" data-delay="1.9" data-rest="6" data-hold="0.5"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="874,514 898,514;1258,514 1282,514" data-c="violet violet" data-speed="90" data-delay="3.8" data-rest="6" data-hold="0.5"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="874,650 898,650;1258,650 1282,650" data-c="violet violet" data-speed="90" data-delay="5.7" data-rest="6" data-hold="0.5"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g></svg></div><figcaption>Each row is one workload, from where its data comes from to what it produces. The partition pills show where its jobs may run.</figcaption></figure>
+    <h3>LLM serving</h3>
+    <p>Every LLM client talks to one OpenAI-style gateway on the head. The gateway starts a llama.cpp router on
+    node04, which holds both Tesla P100s. A model that fits in their 32 GB runs on one card or across both. A bigger
+    one keeps its overflow on node04's own CPUs. When nothing is asking, the model is unloaded and then the nodes
+    power off. A request wakes them again.</p>
+    <figure><div class="fig-scroll"><svg class="pz " viewBox="0 0 1680 802" width="1680" height="802" role="img" aria-label="slerm cluster: clients call one gateway on slerm-head, which starts a llama.cpp router on node04; the router runs a model on its two Tesla P100s and keeps any overflow on node04&#x27;s own CPUs." data-w="1680"><defs><marker id="ah-slerm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="60" y="62" class="big">slerm<tspan class="mu"> LLM serving</tspan></text><text x="60" y="90" class="sm mu">one slerm workload · llama.cpp on two Tesla P100s, CPU overflow for the biggest models</text><circle cx="1334" cy="36" r="3.5" class="st-run" style="animation-delay:-1.37s"/><text x="1344" y="40" class="sm">running now</text><circle cx="1444" cy="36" r="3.5" class="st-off"/><text x="1454" y="40" class="sm">powered off until a request</text><line x1="1334" y1="60" x2="1358" y2="60" class="req"/><text x="1366" y="64" class="sm">request path</text><text x="60" y="150" class="ey">CLIENTS · ONE OPENAI-STYLE ENDPOINT</text><text x="60" y="180" class="nm">Open WebUI</text><text x="60" y="196" class="sm mu">chat, on Cryo-Ai</text><line x1="300" y1="176" x2="356" y2="176" class="req"/><text x="60" y="220" class="nm">opencode</text><text x="60" y="236" class="sm mu">on Ghost and in Open WebUI Code mode</text><line x1="300" y1="216" x2="356" y2="216" class="req"/><text x="60" y="260" class="nm">Computer Agent</text><text x="60" y="276" class="sm mu">drives the AI-Sandbox desktop</text><line x1="300" y1="256" x2="356" y2="256" class="req"/><text x="60" y="300" class="nm">delegate</text><text x="60" y="316" class="sm mu">Claude Code hands off grunt work</text><line x1="300" y1="296" x2="356" y2="296" class="req"/><text x="60" y="340" class="nm">zsh-ai</text><text x="60" y="356" class="sm mu">shell assistant</text><line x1="300" y1="336" x2="356" y2="336" class="req"/><text x="60" y="380" class="nm">Firstlook</text><text x="60" y="396" class="sm mu">eBay listing filter</text><line x1="300" y1="376" x2="356" y2="376" class="req"/><text x="60" y="420" class="nm">Wazuh triage</text><text x="60" y="436" class="sm mu">slerm panel, alerts from Wuzah</text><line x1="300" y1="416" x2="356" y2="416" class="req"/><line x1="356" y1="176" x2="356" y2="416" class="req"/><text x="416" y="174" class="ey">VM ON BYTEME · ROCKY LINUX · 2 vCPU · 4 GB</text><circle cx="420" cy="196" r="3.5" class="st-run" style="animation-delay:-2.74s"/><text x="432" y="200" class="ti">slerm-head</text><line x1="401" y1="218" x2="799" y2="218" class="hr"/><text x="416" y="246" class="nm">gateway</text><text x="528" y="246" class="sm">holds requests while nodes wake</text><text x="416" y="290" class="nm">slerm-orch</text><text x="528" y="290" class="sm">starts routers · idles · powers nodes</text><line x1="416" y1="264" x2="784" y2="264" class="hr"/><text x="416" y="334" class="nm">Slurm</text><text x="528" y="334" class="sm">slurmctld + slurmdbd on MariaDB</text><line x1="416" y1="308" x2="784" y2="308" class="hr"/><text x="416" y="378" class="nm">NFS · 700 GB</text><text x="528" y="378" class="sm">models, apps and home directories</text><line x1="416" y1="352" x2="784" y2="352" class="hr"/><text x="416" y="422" class="nm">panel</text><text x="528" y="422" class="sm">cluster, jobs, AI usage, Wazuh triage</text><line x1="416" y1="396" x2="784" y2="396" class="hr"/><rect x="400" y="150" width="400" height="302" rx="10" class="card frame"/><line x1="356" y1="242" x2="398" y2="242" class="req" marker-end="url(#ah-slerm)"/><rect x="880" y="150" width="360" height="170" rx="10" class="card card-hi"/><text x="896" y="174" class="ey">VM · BYTEME · 36 vCPU · 45 GB</text><circle cx="900" cy="196" r="3.5" class="st-off"/><text x="912" y="200" class="ti">slerm-node04</text><text x="896" y="226" class="sm">2× Tesla P100 · 16 GB each · Pascal (cc 6.0)</text><text x="896" y="246" class="sm">llama-server in router mode, one model at a time</text><text x="896" y="266" class="sm">100 GB local model cache · a 1B task model beside it</text><rect x="896" y="286" width="30" height="15" rx="7.5" class="pill p-tun"/><text x="911" y="297" class="m xs pt-tun" text-anchor="middle">gpu</text><rect x="931" y="286" width="30" height="15" rx="7.5" class="pill p-tun"/><text x="946" y="297" class="m xs pt-tun" text-anchor="middle">llm</text><line x1="800" y1="242" x2="878" y2="242" class="req" marker-end="url(#ah-slerm)"/><text x="840" y="234" class="m xs mu" text-anchor="middle">HTTP</text><text x="1264" y="174" class="ey">HOW A MODEL IS SPLIT ACROSS THE POOL</text><text x="1264" y="200" class="sm">qwen3.6 35B-A3B (25 GB): both cards</text><rect x="1264" y="208" width="165.82" height="16" rx="2" class="seg gpu1"/><text x="1270" y="220" class="m xs seg-t">P100 #1 47</text><rect x="1431.32" y="208" width="187.18" height="16" rx="2" class="seg gpu2"/><text x="1437.32" y="220" class="m xs seg-t">P100 #2 53</text><text x="1264" y="250" class="sm">gpt-oss 120B (59 GB): overflow on the CPUs</text><rect x="1264" y="258" width="73.26" height="16" rx="2" class="seg gpu1"/><text x="1270" y="270" class="m xs seg-t">P100 #1 21</text><rect x="1338.76" y="258" width="87.5" height="16" rx="2" class="seg gpu2"/><text x="1344.76" y="270" class="m xs seg-t">P100 #2 25</text><rect x="1427.76" y="258" width="190.74" height="16" rx="2" class="seg cpu3"/><text x="1433.76" y="270" class="m xs seg-t">node04 CPUs 54</text><rect x="1264" y="290" width="10" height="10" rx="2" class="seg gpu1"/><text x="1278" y="299" class="m xs mu">P100 #1</text><rect x="1336.2" y="290" width="10" height="10" rx="2" class="seg gpu2"/><text x="1350.2" y="299" class="m xs mu">P100 #2</text><rect x="1408.4" y="290" width="10" height="10" rx="2" class="seg cpu3"/><text x="1422.4" y="299" class="m xs mu">node04 CPUs</text><text x="1264" y="322" class="xs mu">layer shares from models.ini · small models use one card</text><line x1="1060" y1="320" x2="1060" y2="372" class="req"/><line x1="965" y1="372" x2="1345" y2="372" class="req"/><text x="1070" y="362" class="m xs mu">ggml-rpc · CPU nodes can join or stand in for node04 · no preset needs them now</text><line x1="965" y1="372" x2="965" y2="408" class="req" marker-end="url(#ah-slerm)"/><rect x="880" y="410" width="170" height="150" rx="10" class="card frame"/><text x="894" y="432" class="ey">VM · BYTEME2</text><circle cx="898" cy="452" r="3.5" class="st-off"/><text x="910" y="456" class="nm">slerm-node01</text><text x="894" y="480" class="sm">CPU only</text><text x="894" y="498" class="sm mu">16 vCPU · 12 GB</text><text x="894" y="516" class="m xs mu">off until needed</text><rect x="894" y="530" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="921" y="541" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="953" y="530" width="48" height="15" rx="7.5" class="pill p-tun"/><text x="977" y="541" class="m xs pt-tun" text-anchor="middle">llmcpu</text><line x1="1155" y1="372" x2="1155" y2="408" class="req" marker-end="url(#ah-slerm)"/><rect x="1070" y="410" width="170" height="150" rx="10" class="card frame"/><text x="1084" y="432" class="ey">VM · BYTEME2</text><circle cx="1088" cy="452" r="3.5" class="st-off"/><text x="1100" y="456" class="nm">slerm-node02</text><text x="1084" y="480" class="sm">CPU only</text><text x="1084" y="498" class="sm mu">16 vCPU · 12 GB</text><text x="1084" y="516" class="m xs mu">off until needed</text><rect x="1084" y="530" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="1111" y="541" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="1143" y="530" width="48" height="15" rx="7.5" class="pill p-tun"/><text x="1167" y="541" class="m xs pt-tun" text-anchor="middle">llmcpu</text><line x1="1345" y1="372" x2="1345" y2="408" class="req" marker-end="url(#ah-slerm)"/><rect x="1260" y="410" width="170" height="150" rx="10" class="card frame"/><text x="1274" y="432" class="ey">BARE METAL · DEADLOCK</text><circle cx="1278" cy="452" r="3.5" class="st-off"/><text x="1290" y="456" class="nm">slerm-node05</text><text x="1274" y="480" class="sm">CPU only</text><text x="1274" y="498" class="sm mu">8 threads · 32 GB</text><text x="1274" y="516" class="m xs mu">off until needed</text><rect x="1274" y="530" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="1301" y="541" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="1333" y="530" width="48" height="15" rx="7.5" class="pill p-tun"/><text x="1357" y="541" class="m xs pt-tun" text-anchor="middle">llmcpu</text><rect x="1450" y="410" width="170" height="150" rx="10" class="card frame parked-card"/><text x="1464" y="432" class="ey">VM · BYTEME3</text><circle cx="1468" cy="452" r="3.5" class="st-off"/><text x="1480" y="456" class="nm">slerm-node03</text><text x="1464" y="480" class="sm">CPU only</text><text x="1464" y="498" class="sm mu">24 vCPU · 20 GB</text><text x="1464" y="516" class="m xs mu">parked with byteme3</text><rect x="1464" y="530" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="1491" y="541" class="m xs pt-tun" text-anchor="middle">compute</text><text x="60" y="486" class="ey">GENERATION SPEED ON THIS POOL (TOK/S)</text><text x="60" y="512" class="sm">ornith-1.5 35B-A3B</text><rect x="196" y="503" width="110" height="10" rx="2" class="bar"/><text x="312" y="512" class="m xs tx">46</text><text x="60" y="532" class="sm">gpt-oss 20B</text><rect x="196" y="523" width="107.609" height="10" rx="2" class="bar"/><text x="309.609" y="532" class="m xs tx">45</text><text x="60" y="552" class="sm">qwen3.6 35B-A3B</text><rect x="196" y="543" width="107.609" height="10" rx="2" class="bar"/><text x="309.609" y="552" class="m xs tx">45</text><text x="60" y="572" class="sm">gemma4 26B-A4B</text><rect x="196" y="563" width="57.3913" height="10" rx="2" class="bar"/><text x="259.391" y="572" class="m xs tx">24</text><text x="60" y="592" class="sm">Coder-Next 80B-A3B</text><rect x="196" y="583" width="26.3043" height="10" rx="2" class="bar"/><text x="228.304" y="592" class="m xs tx">11</text><text x="60" y="612" class="sm">gpt-oss 120B</text><rect x="196" y="603" width="23.913" height="10" rx="2" class="bar"/><text x="225.913" y="612" class="m xs tx">10</text><text x="60" y="640" class="ey">NODE LIFECYCLE · RUN BY SLERM-ORCH</text><rect x="60" y="662" width="130" height="30" rx="15" class="pill p-state" style="animation-delay:0s"/><text x="125" y="681" class="sm tx" text-anchor="middle">serving</text><line x1="196" y1="677" x2="528.667" y2="677" class="nt" marker-end="url(#ah-slerm)"/><text x="362.333" y="670" class="m xs mu" text-anchor="middle">idle 20 min · unload model, release CPU nodes</text><rect x="536.667" y="662" width="130" height="30" rx="15" class="pill p-state" style="animation-delay:2.5s"/><text x="601.667" y="681" class="sm tx" text-anchor="middle">model unloaded</text><line x1="672.667" y1="677" x2="1005.33" y2="677" class="nt" marker-end="url(#ah-slerm)"/><text x="839" y="670" class="m xs mu" text-anchor="middle">idle 60 min · off via Proxmox API or BMC</text><rect x="1013.33" y="662" width="130" height="30" rx="15" class="pill p-state" style="animation-delay:5s"/><text x="1078.33" y="681" class="sm tx" text-anchor="middle">powered off</text><line x1="1149.33" y1="677" x2="1482" y2="677" class="nt" marker-end="url(#ah-slerm)"/><text x="1315.67" y="670" class="m xs mu" text-anchor="middle">request arrives · gateway holds it</text><rect x="1490" y="662" width="130" height="30" rx="15" class="pill p-state" style="animation-delay:7.5s"/><text x="1555" y="681" class="sm tx" text-anchor="middle">waking</text><path d="M1555.0,692 v18 q0,10 -10,10 H135.0 q-10,0 -10,-10 v-16" class="nt" marker-end="url(#ah-slerm)"/><text x="840" y="738" class="m xs mu" text-anchor="middle">nodes boot, the router loads the model, the held request is answered</text><text x="60" y="774" class="sm">A VM started by hand on byteme pre-empts slerm through a Proxmox hookscript. When the UPS is on battery, byteme2 tells the head, and slerm freezes its jobs and stops waking nodes.</text><g class="pk" data-legs="300,176 356,176 356,242 398,242;800,242 878,242;878,242 800,242;398,242 356,242 356,176 300,176" data-c="violet violet text text" data-speed="140" data-delay="0" data-rest="9" data-hold="0.6"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="300,216 356,216 356,242 398,242;800,242 878,242;878,242 800,242;398,242 356,242 356,216 300,216" data-c="violet violet text text" data-speed="140" data-delay="2.4" data-rest="9" data-hold="0.6"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="300,256 356,256 356,242 398,242;800,242 878,242;878,242 800,242;398,242 356,242 356,256 300,256" data-c="violet violet text text" data-speed="140" data-delay="4.8" data-rest="9" data-hold="0.6"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="300,296 356,296 356,242 398,242;800,242 878,242;878,242 800,242;398,242 356,242 356,296 300,296" data-c="violet violet text text" data-speed="140" data-delay="7.2" data-rest="9" data-hold="0.6"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="300,336 356,336 356,242 398,242;800,242 878,242;878,242 800,242;398,242 356,242 356,336 300,336" data-c="violet violet text text" data-speed="140" data-delay="9.6" data-rest="9" data-hold="0.6"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="300,376 356,376 356,242 398,242;800,242 878,242;878,242 800,242;398,242 356,242 356,376 300,376" data-c="violet violet text text" data-speed="140" data-delay="12" data-rest="9" data-hold="0.6"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="300,416 356,416 356,242 398,242;800,242 878,242;878,242 800,242;398,242 356,242 356,416 300,416" data-c="violet violet text text" data-speed="140" data-delay="14.4" data-rest="9" data-hold="0.6"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g></svg></div><figcaption>Request path in violet, answers in white. In this snapshot only the head is running, so the first request wakes node04. The split bars come from the model presets and the speeds are measured through the gateway.</figcaption></figure>
+  </section>
+
+  <section class="band" id="power">
+    <div class="eyebrow">03 · Power</div>
+    <h2>Power failure</h2>
+    <p>The UPS carries one PSU of each server. When it reports mains lost, ups-guardian on byteme2 sheds everything
+    it can within four minutes. It keeps DNS and the tailnet router up so the lab stays reachable, and puts
+    it all back when mains return.</p>
+    <figure><div class="fig-scroll"><svg class="pz " viewBox="0 0 1680 972" width="1680" height="972" role="img" aria-label="Power failure timeline: after a 15 second grace, ups-guardian powers off byteme and deadlock and shuts byteme2&#x27;s guests in parallel, all inside a 240 second deadline, well within the UPS runtime; DNS and the tailnet router keep running." data-w="1680"><defs><marker id="ah-pwr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="60" y="62" class="big">power failure<tspan class="mu"> · ups-guardian</tspan></text><text x="60" y="90" class="sm mu">CyberPower LX1500GAVR on USB to byteme2 · pwrstatd polls every 3 s · ~64 min of runtime at today&#x27;s idle 108 W</text><text x="60" y="136" class="ey">FIRST MINUTES ON BATTERY · DRAWN TO SCALE</text><line x1="300" y1="176" x2="300" y2="596" class="grid"/><text x="300" y="168" class="m xs mu" text-anchor="middle">0:00</text><line x1="410" y1="176" x2="410" y2="596" class="grid"/><text x="410" y="168" class="m xs mu" text-anchor="middle">0:30</text><line x1="520" y1="176" x2="520" y2="596" class="grid"/><text x="520" y="168" class="m xs mu" text-anchor="middle">1:00</text><line x1="630" y1="176" x2="630" y2="596" class="grid"/><text x="630" y="168" class="m xs mu" text-anchor="middle">1:30</text><line x1="740" y1="176" x2="740" y2="596" class="grid"/><text x="740" y="168" class="m xs mu" text-anchor="middle">2:00</text><line x1="850" y1="176" x2="850" y2="596" class="grid"/><text x="850" y="168" class="m xs mu" text-anchor="middle">2:30</text><line x1="960" y1="176" x2="960" y2="596" class="grid"/><text x="960" y="168" class="m xs mu" text-anchor="middle">3:00</text><line x1="1070" y1="176" x2="1070" y2="596" class="grid"/><text x="1070" y="168" class="m xs mu" text-anchor="middle">3:30</text><line x1="1180" y1="176" x2="1180" y2="596" class="grid"/><text x="1180" y="168" class="m xs mu" text-anchor="middle">4:00</text><line x1="1290" y1="176" x2="1290" y2="596" class="grid"/><text x="1290" y="168" class="m xs mu" text-anchor="middle">4:30</text><line x1="1400" y1="176" x2="1400" y2="596" class="grid"/><text x="1400" y="168" class="m xs mu" text-anchor="middle">5:00</text><line x1="1510" y1="176" x2="1510" y2="596" class="grid"/><text x="1510" y="168" class="m xs mu" text-anchor="middle">5:30</text><line x1="1620" y1="176" x2="1620" y2="596" class="grid"/><text x="1620" y="168" class="m xs mu" text-anchor="middle">6:00</text><text x="60" y="206" class="nm">pwrstatd</text><text x="60" y="222" class="xs mu">UPS reports mains lost</text><text x="60" y="252" class="nm">blip filter</text><text x="60" y="268" class="xs mu">cancel if mains return</text><text x="60" y="298" class="nm">byteme</text><text x="60" y="314" class="xs mu">Dell R730 · slerm GPUs</text><text x="60" y="344" class="nm">deadlock</text><text x="60" y="360" class="xs mu">slerm-node05</text><text x="60" y="390" class="nm">byteme2 guests</text><text x="60" y="406" class="xs mu">all at once</text><text x="60" y="436" class="nm">byteme2 host</text><text x="60" y="452" class="xs mu">HP DL360</text><text x="60" y="482" class="nm">DNS + CFT</text><text x="60" y="498" class="xs mu">Technitium · tailnet router</text><text x="60" y="528" class="nm">Starlink + Wi-Fi</text><text x="60" y="544" class="xs mu">network gear</text><text x="60" y="574" class="nm">slerm</text><text x="60" y="590" class="xs mu">orchestrator</text><circle cx="300" cy="203" r="5" class="st-run"/><text x="314" y="207" class="sm">mains lost → ups-guardian onbatt; slerm is told at once</text><rect x="300" y="242" width="55" height="14" rx="3" class="b-wait"/><text x="365" y="253" class="sm">waits 15 s · short blips end here with nothing touched · skipped if the battery already reads low</text><rect x="355" y="288" width="330" height="14" rx="3" class="b-off"/><text x="695" y="299" class="sm">iDRAC soft power-off (Proxmox shuts its VMs) · forced off at 90 s if still up</text><rect x="355" y="334" width="550" height="14" rx="3" class="b-off"/><text x="915" y="345" class="sm">BMC soft power-off · 150 s to confirm</text><rect x="355" y="380" width="220" height="14" rx="3" class="b-off"/><rect x="575" y="380" width="440" height="14" rx="3" class="b-wait"/><text x="583" y="391" class="m xs tx">9 guests at once · 60 s grace (25 s with no agent, Wuzah 180 s)</text><rect x="1015" y="426" width="605" height="14" rx="3" class="b-keep"/><text x="1190" y="437" class="m xs seg-t">iLO power cap 107 W once the guests are down</text><rect x="300" y="472" width="1320" height="14" rx="3" class="b-keep"/><text x="308" y="483" class="m xs seg-t">keep running for DNS and remote access until low battery</text><rect x="300" y="518" width="1320" height="14" rx="3" class="b-keep"/><text x="308" y="529" class="m xs seg-t">stays up, and keeps going after byteme2 halts</text><rect x="300" y="564" width="1320" height="14" rx="3" class="b-slerm"/><text x="308" y="575" class="m xs seg-t">told at once and every 60 s · running jobs frozen · no node power-ons</text><line x1="1180" y1="176" x2="1180" y2="604" class="deadline"/><text x="1186" y="618" class="m xs dl">4 min hard deadline: anything still up is force-stopped</text><text x="1620" y="146" class="m xs mu" text-anchor="end">ups-guardian is sized for ~7 min of battery under load</text><g class="ph" data-x0="300" data-x1="1620" data-t="360"><rect class="ph-veil" x="300" y="176" width="1380" height="448"/><line class="ph-line" x1="300" y1="164" x2="300" y2="600"/><rect class="ph-tag" x="278" y="153" width="44" height="19" rx="9.5"/><text class="ph-t" x="300" y="166.5" text-anchor="middle">0:00</text></g><text x="60" y="666" class="ey">LOW BATTERY</text><text x="60" y="688" class="sm">At 35 % charge or under 5 min of runtime, judged once byteme is confirmed off: force-stop anything left, shut down Technitium and CFT, halt byteme2.</text><text x="60" y="708" class="sm">Starlink and the Wi-Fi outlast it on the UPS, so the house keeps internet a while longer.</text><text x="60" y="752" class="ey">POWER BACK · RESTORE WATCHER CHECKS EVERY 15 S</text><rect x="60" y="768" width="288" height="64" rx="10" class="card frame"/><text x="74" y="792" class="m sm mu">1</text><text x="94" y="792" class="nm">Lift the cap</text><text x="74" y="814" class="sm mu">byteme2&#x27;s iLO power cap comes off</text><line x1="351" y1="800" x2="374" y2="800" class="nt" marker-end="url(#ah-pwr)"/><rect x="378" y="768" width="288" height="64" rx="10" class="card frame"/><text x="392" y="792" class="m sm mu">2</text><text x="412" y="792" class="nm">Power on byteme</text><text x="392" y="814" class="sm mu">via iDRAC, never within 150 s of the power-off</text><line x1="669" y1="800" x2="692" y2="800" class="nt" marker-end="url(#ah-pwr)"/><rect x="696" y="768" width="288" height="64" rx="10" class="card frame"/><text x="710" y="792" class="m sm mu">3</text><text x="730" y="792" class="nm">Restart byteme&#x27;s VMs</text><text x="710" y="814" class="sm mu">pve-guest-restore: slerm-head first, then the rest</text><line x1="987" y1="800" x2="1010" y2="800" class="nt" marker-end="url(#ah-pwr)"/><rect x="1014" y="768" width="288" height="64" rx="10" class="card frame"/><text x="1028" y="792" class="m sm mu">4</text><text x="1048" y="792" class="nm">Restart byteme2 guests</text><text x="1028" y="814" class="sm mu">exactly the list it stopped</text><line x1="1305" y1="800" x2="1328" y2="800" class="nt" marker-end="url(#ah-pwr)"/><rect x="1332" y="768" width="288" height="64" rx="10" class="card frame"/><text x="1346" y="792" class="m sm mu">5</text><text x="1366" y="792" class="nm">Power on deadlock</text><text x="1346" y="814" class="sm mu">via BMC once slerm-head answers (≤ 15 min)</text><text x="60" y="858" class="sm">slerm is told power is back. If byteme doesn&#x27;t answer, the watcher retries up to 20 times.</text><text x="60" y="902" class="ey">DISARM</text><text x="60" y="924" class="sm">A switch on the power dashboard mutes the</text><text x="60" y="942" class="sm">response for up to 4 h. Low battery still acts.</text><text x="456" y="902" class="ey">TESTED</text><text x="456" y="924" class="sm">A dry run and a real outage test replay the</text><text x="456" y="942" class="sm">whole sequence from the dashboard.</text><text x="852" y="902" class="ey">VISIBLE</text><text x="852" y="924" class="sm">The power dashboard opens an incident console;</text><text x="852" y="942" class="sm">the Pi wall jumps to its outage scene.</text><text x="1248" y="902" class="ey">LAST REAL ONES</text><text x="1248" y="924" class="sm">1 Oct: two planned pulls of the UPS plug.</text><text x="1248" y="942" class="sm">19 Sep: a 48 s blackout ran the full sequence.</text></svg></div><figcaption>Timeline drawn to scale from ups-guardian&#x27;s own timeouts. Bars show the longest each step is allowed to take. The playhead replays the first six minutes in sixteen seconds.</figcaption></figure>
+  </section>
+
+  <section class="band" id="edge">
+    <div class="eyebrow">04 · Outside</div>
+    <h2>Public edge</h2>
+    <p>How outside traffic reaches the lab and what the lab sends out. The website never talks to the house
+    directly: the Worker reads the Pi's status API through a Cloudflare tunnel, and media goes through the VPS.</p>
+    <figure><div class="fig-scroll"><svg class="pz " viewBox="0 0 1360 528" width="1360" height="528" role="img" aria-label="How outside traffic reaches the lab and what the lab sends out: six paths, each a chain from source to destination with the transport on every hop." data-w="1360"><defs><marker id="ah-edge" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="16" y="40" class="nm">Website status</text><text x="16" y="58" class="sm mu">live lab numbers</text><rect x="206" y="16" width="190" height="56" rx="10" class="card frame"/><text x="220" y="40" class="nm">Raspberry Pi 3B</text><text x="220" y="58" class="sm mu">status API · Proxmox + UPS</text><line x1="402" y1="44" x2="514" y2="44" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="36" class="m xs mu" text-anchor="middle">HTTP</text><text x="458" y="60" class="m xs mu" text-anchor="middle">on the LAN</text><rect x="522" y="16" width="190" height="56" rx="10" class="card frame"/><text x="536" y="40" class="nm">cloudflared on CFT</text><text x="536" y="58" class="sm mu">tunnel to Cloudflare</text><line x1="718" y1="44" x2="830" y2="44" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="36" class="m xs mu" text-anchor="middle">outbound</text><text x="774" y="60" class="m xs mu" text-anchor="middle">tunnel</text><rect x="838" y="16" width="190" height="56" rx="10" class="card frame"/><text x="852" y="40" class="nm">Worker nbdevlab</text><text x="852" y="58" class="sm mu">reads it through the tunnel</text><line x1="1034" y1="44" x2="1146" y2="44" class="nt" marker-end="url(#ah-edge)"/><text x="1090" y="36" class="m xs mu" text-anchor="middle">JSON</text><text x="1090" y="60" class="m xs mu" text-anchor="middle">per visit</text><rect x="1154" y="16" width="190" height="56" rx="10" class="card frame"/><text x="1168" y="40" class="nm">nbdevlab.com/status</text><text x="1168" y="58" class="sm mu">visitor&#x27;s browser</text><line x1="16" y1="88" x2="1344" y2="88" class="hr"/><text x="16" y="124" class="nm">Weather</text><text x="16" y="142" class="sm mu">Tempest on the site</text><rect x="206" y="100" width="190" height="56" rx="10" class="card frame"/><text x="220" y="124" class="nm">Tempest station</text><text x="220" y="142" class="sm mu">hub on Wi-Fi</text><line x1="402" y1="128" x2="514" y2="128" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="120" class="m xs mu" text-anchor="middle">uploads</text><rect x="522" y="100" width="190" height="56" rx="10" class="card frame"/><text x="536" y="124" class="nm">WeatherFlow API</text><text x="536" y="142" class="sm mu">cloud REST</text><line x1="718" y1="128" x2="830" y2="128" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="120" class="m xs mu" text-anchor="middle">token auth</text><rect x="838" y="100" width="190" height="56" rx="10" class="card frame"/><text x="852" y="124" class="nm">Worker nbdevlab</text><text x="852" y="142" class="sm mu">stores history in D1</text><line x1="1034" y1="128" x2="1146" y2="128" class="nt" marker-end="url(#ah-edge)"/><text x="1090" y="120" class="m xs mu" text-anchor="middle">JSON</text><text x="1090" y="144" class="m xs mu" text-anchor="middle">+ trends</text><rect x="1154" y="100" width="190" height="56" rx="10" class="card frame"/><text x="1168" y="124" class="nm">nbdevlab.com/weather</text><text x="1168" y="142" class="sm mu">visitor&#x27;s browser</text><line x1="16" y1="172" x2="1344" y2="172" class="hr"/><text x="16" y="208" class="nm">Media</text><text x="16" y="226" class="sm mu">home stays closed</text><rect x="206" y="184" width="190" height="56" rx="10" class="card frame"/><text x="220" y="208" class="nm">Viewer</text><text x="220" y="226" class="sm mu">anywhere</text><line x1="402" y1="212" x2="514" y2="212" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="204" class="m xs mu" text-anchor="middle">HTTPS</text><rect x="522" y="184" width="190" height="56" rx="10" class="card frame"/><text x="536" y="208" class="nm">Oracle VPS</text><text x="536" y="226" class="sm mu">Caddy · Let&#x27;s Encrypt</text><line x1="718" y1="212" x2="830" y2="212" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="204" class="m xs mu" text-anchor="middle">WireGuard</text><text x="774" y="228" class="m xs mu" text-anchor="middle">dialed from home</text><rect x="838" y="184" width="190" height="56" rx="10" class="card frame"/><text x="852" y="208" class="nm">Jellyfin VM</text><text x="852" y="226" class="sm mu">isolated DMZ</text><line x1="16" y1="256" x2="1344" y2="256" class="hr"/><text x="16" y="292" class="nm">Admin · tailnet</text><text x="16" y="310" class="sm mu">whole LAN, anywhere</text><rect x="206" y="268" width="190" height="56" rx="10" class="card frame"/><text x="220" y="292" class="nm">Ghost or phone</text><text x="220" y="310" class="sm mu">anywhere</text><line x1="402" y1="296" x2="514" y2="296" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="288" class="m xs mu" text-anchor="middle">Tailscale</text><text x="458" y="312" class="m xs mu" text-anchor="middle">direct WireGuard</text><rect x="522" y="268" width="190" height="56" rx="10" class="card frame"/><text x="536" y="292" class="nm">byteme2 · CFT</text><text x="536" y="310" class="sm mu">subnet routers</text><line x1="718" y1="296" x2="830" y2="296" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="288" class="m xs mu" text-anchor="middle">routed</text><rect x="838" y="268" width="190" height="56" rx="10" class="card frame"/><text x="852" y="292" class="nm">The lab</text><text x="852" y="310" class="sm mu">names via Technitium</text><line x1="16" y1="340" x2="1344" y2="340" class="hr"/><text x="16" y="376" class="nm">Admin · browser</text><text x="16" y="394" class="sm mu">UIs behind Access</text><rect x="206" y="352" width="190" height="56" rx="10" class="card frame"/><text x="220" y="376" class="nm">Browser</text><text x="220" y="394" class="sm mu">anywhere</text><line x1="402" y1="380" x2="514" y2="380" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="372" class="m xs mu" text-anchor="middle">HTTPS</text><rect x="522" y="352" width="190" height="56" rx="10" class="card frame"/><text x="536" y="376" class="nm">Cloudflare Access</text><text x="536" y="394" class="sm mu">Zero Trust login</text><line x1="718" y1="380" x2="830" y2="380" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="372" class="m xs mu" text-anchor="middle">tunnel</text><rect x="838" y="352" width="190" height="56" rx="10" class="card frame"/><text x="852" y="376" class="nm">cloudflared</text><text x="852" y="394" class="sm mu">outbound tunnel</text><line x1="1034" y1="380" x2="1146" y2="380" class="nt" marker-end="url(#ah-edge)"/><text x="1090" y="372" class="m xs mu" text-anchor="middle">LAN</text><rect x="1154" y="352" width="190" height="56" rx="10" class="card frame"/><text x="1168" y="376" class="nm">Admin UIs</text><text x="1168" y="394" class="sm mu">on the LAN</text><line x1="16" y1="424" x2="1344" y2="424" class="hr"/><text x="16" y="460" class="nm">VPS monitoring</text><text x="16" y="478" class="sm mu">the VPS reports home</text><rect x="206" y="436" width="190" height="56" rx="10" class="card frame"/><text x="220" y="460" class="nm">Oracle VPS</text><text x="220" y="478" class="sm mu">Wazuh agent</text><line x1="402" y1="464" x2="514" y2="464" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="456" class="m xs mu" text-anchor="middle">WireGuard</text><text x="458" y="480" class="m xs mu" text-anchor="middle">agent traffic only</text><rect x="522" y="436" width="190" height="56" rx="10" class="card frame"/><text x="536" y="460" class="nm">Wuzah</text><text x="536" y="478" class="sm mu">Wazuh manager</text><line x1="718" y1="464" x2="830" y2="464" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="456" class="m xs mu" text-anchor="middle">serious</text><text x="774" y="480" class="m xs mu" text-anchor="middle">alerts</text><rect x="838" y="436" width="190" height="56" rx="10" class="card frame"/><text x="852" y="460" class="nm">PMG</text><text x="852" y="478" class="sm mu">mail gateway</text><line x1="1034" y1="464" x2="1146" y2="464" class="nt" marker-end="url(#ah-edge)"/><text x="1090" y="456" class="m xs mu" text-anchor="middle">relay</text><rect x="1154" y="436" width="190" height="56" rx="10" class="card frame"/><text x="1168" y="460" class="nm">Brevo</text><text x="1168" y="478" class="sm mu">SMTP relay → inbox</text><g class="pk" data-legs="402,44 510,44;718,44 826,44;1034,44 1142,44" data-c="text text text" data-speed="110" data-delay="0" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,128 510,128;718,128 826,128;1034,128 1142,128" data-c="text text text" data-speed="110" data-delay="1.15" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,212 510,212;718,212 826,212" data-c="text text" data-speed="110" data-delay="2.3" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,296 510,296;718,296 826,296" data-c="text text" data-speed="110" data-delay="3.45" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,380 510,380;718,380 826,380;1034,380 1142,380" data-c="text text text" data-speed="110" data-delay="4.6" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,464 510,464;718,464 826,464;1034,464 1142,464" data-c="text text text" data-speed="110" data-delay="5.75" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g></svg></div><figcaption>Six paths, each drawn from source to destination with the transport on every hop.</figcaption></figure>
+  </section>
+
+  <section class="band" id="security">
+    <div class="eyebrow">05 · Security</div>
+    <h2>How it stays closed</h2>
+    <p>The rules the layout above follows.</p>
+    <div class="rules"><div><h3>No inbound ports at home</h3><p>Starlink&#x27;s NAT sits in front of the Firebox. Everything that comes in rides a connection the lab opened itself: a Cloudflare tunnel, WireGuard to the VPS, or Tailscale.</p></div><div><h3>The public box can&#x27;t see the lab</h3><p>The VPS is kept off the tailnet on purpose. Its WireGuard peers are locked down: one reaches only the Jellyfin VM, the other carries Wazuh agent traffic and nothing else.</p></div><div><h3>Media sits in a DMZ</h3><p>Jellyfin has its own VLAN, and the Firebox keeps it apart from every other segment.</p></div><div><h3>Admin pages need a login first</h3><p>Admin UIs on the web sit behind Cloudflare Access. Everything else is reachable only over the tailnet.</p></div><div><h3>One SIEM sees everything</h3><p>The hypervisors, servers and the VPS report to Wazuh. It blocks SSH brute force on its own and mails serious alerts out through PMG.</p></div><div><h3>This page leaves things out</h3><p>No addresses, port numbers, software versions or admin hostnames. The diagrams show how the lab is put together, not where to knock.</p></div></div>
+  </section>
+
+  <section class="band" id="hardware">
+    <div class="eyebrow">06 · Specs</div>
+    <h2>Hardware</h2>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Machine</th><th>Role</th><th>Platform</th><th>CPU</th><th>RAM</th><th>Storage</th><th>Network</th><th>Power</th></tr></thead>
+      <tbody><tr><td>byteme2</td><td>Proxmox VE · main hypervisor</td><td>HP ProLiant DL360 Gen9</td><td>2× Xeon E5-2683 v4 · 32C/64T</td><td class='num'>64 GB</td><td>ZFS raidz1 5× 1.2 TB SAS · 2× 1 TB SSD (LVM) · 128 GB boot SSD · 500 GB HDD</td><td>4× 1 GbE · ConnectX-3 Pro 10 GbE (unused) · iLO</td><td>2 PSUs · 155 W now</td></tr>
+<tr><td>byteme</td><td>Proxmox VE · slerm GPU host</td><td>Dell PowerEdge R730</td><td>2× Xeon E5-2695 v4 · 36C/72T</td><td class='num'>64 GB</td><td>ZFS raidz1 6× 1.2 TB SAS · btrfs RAID1 boot on 2× 1.2 TB SAS</td><td>2× 10 GbE + 2× 1 GbE · iDRAC</td><td>2× 1100 W · 192 W idle now · 574 W with both GPUs loaded</td></tr>
+<tr><td class='sub'>↳</td><td>GPUs (passthrough)</td><td>2× Tesla P100 16 GB (Pascal), both in slerm-node04</td><td></td><td class='num'>32 GB VRAM</td><td></td><td></td><td>passive cards, cooled by the chassis fans</td></tr>
+<tr><td>byteme3</td><td>Proxmox VE · parked</td><td>HP ProLiant DL380 Gen9</td><td>2× Xeon E5-2690 v3 · 24C/48T</td><td class='num'>none fitted</td><td>ZFS raidz2 6× 1.2 TB SAS</td><td>12× 1 GbE · 2× 10 GbE SFP+ · iLO</td><td>2× 800 W · off since its memory went into byteme</td></tr>
+<tr><td>deadlock</td><td>bare metal · slerm-node05</td><td>Intel S1600JP board</td><td>Xeon E5-1620 v2 · 4C/8T</td><td class='num'>32 GB</td><td>2.6 TB local (unused)</td><td>1 GbE · BMC</td><td>2 PSUs · off at idle, 6 W standby</td></tr>
+<tr><td>Starlink</td><td>internet</td><td>Starlink dish + router in front of the Firebox</td><td></td><td class='num'></td><td></td><td>double NAT in front of the Firebox</td><td>stays up after byteme2 halts</td></tr>
+<tr><td>Linksys</td><td>Wi-Fi access point</td><td>Linksys router in AP-only mode + 1 mesh extender</td><td></td><td class='num'></td><td></td><td>uplink to the Firebox · DHCP from Technitium</td><td></td></tr>
+<tr><td>Firebox</td><td>edge firewall and router</td><td>WatchGuard Firebox M400</td><td></td><td class='num'></td><td></td><td>8× 1 GbE · VLAN trunk to byteme2</td><td></td></tr>
+<tr><td>UPS</td><td>battery for one PSU per server</td><td>CyberPower LX1500GAVR</td><td></td><td class='num'></td><td></td><td>USB → byteme2</td><td>1500 VA / 900 W · 108 W now</td></tr>
+<tr><td>Pi</td><td>lab wall + public status API</td><td>Raspberry Pi 3 Model B · Debian · Acer KA272 27″</td><td>4× Cortex-A53</td><td class='num'>1 GB</td><td>microSD</td><td>LAN</td><td></td></tr>
+<tr><td>VPS</td><td>Oracle Cloud</td><td>Ampere A1 (Neoverse-N1) · Ubuntu</td><td>4 cores</td><td class='num'>24 GB</td><td>45 GB</td><td>public IP · WireGuard hub</td><td></td></tr>
+<tr><td>Ghost</td><td>daily driver</td><td>HP ENVY x360 15 · Arch Linux · KDE Plasma 6</td><td>Ryzen 5 4500U · 6C</td><td class='num'></td><td></td><td>Wi-Fi · Tailscale</td><td></td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="band" id="guests">
+    <div class="eyebrow">07 · Inventory</div>
+    <h2>Guests</h2>
+    <p>12 guests running, three slerm VMs that start on demand, deadlock, and node03 parked with byteme3.
+    The rest are defined in Proxmox but stopped.</p>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Name</th><th>Type</th><th>Host</th><th>State</th><th>Role</th><th>Network</th><th>RAM</th><th>Disk</th><th>Tags</th></tr></thead>
+      <tbody><tr><td>Technitium</td><td class='num'>CT</td><td>byteme2</td><td><span class="state">running</span></td><td>DNS · DHCP for Wi-Fi</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>6.1 GB</td><td class='num'>24 GB</td><td></td></tr>
+<tr><td>CFT</td><td class='num'>VM</td><td>byteme2</td><td><span class="state">running</span></td><td>tailnet router · CF tunnel</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>4.5 GB</td><td class='num'>15 GB</td><td><span class="tag">cf</span><span class="tag">ts</span></td></tr>
+<tr><td>PMG</td><td class='num'>CT</td><td>byteme2</td><td><span class="state">running</span></td><td>mail gateway → Brevo</td><td><span class="net" style="--c: var(--mgmt)">mgmt</span></td><td class='num'>6 GB</td><td class='num'>20 GB</td><td></td></tr>
+<tr><td>Wuzah</td><td class='num'>VM</td><td>byteme2</td><td><span class="state">running</span></td><td>Wazuh SIEM</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>10.8 GB</td><td class='num'>127 GB</td><td><span class="tag">wg</span><span class="tag">ts</span></td></tr>
+<tr><td>psql</td><td class='num'>CT</td><td>byteme2</td><td><span class="state">running</span></td><td>PostgreSQL</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>5.1 GB</td><td class='num'>32 GB</td><td></td></tr>
+<tr><td>HA</td><td class='num'>VM</td><td>byteme2</td><td><span class="state">running</span></td><td>Home Assistant OS</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>4 GB</td><td class='num'>32 GB</td><td><span class="tag">ts</span></td></tr>
+<tr><td>nextcloud</td><td class='num'>CT</td><td>byteme2</td><td><span class="state">running</span></td><td>Nextcloud · 1.4 TB</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>8.1 GB</td><td class='num'>1.4 TB</td><td></td></tr>
+<tr><td>Jellyfin</td><td class='num'>VM</td><td>byteme2</td><td><span class="state">running</span></td><td>media server</td><td><span class="net" style="--c: var(--dmz)">DMZ</span></td><td class='num'>6.1 GB</td><td class='num'>1.0 TB</td><td><span class="tag">wg</span></td></tr>
+<tr><td>Cryo-Ai</td><td class='num'>VM</td><td>byteme2</td><td><span class="state">running</span></td><td>Open WebUI · Ollama</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>6.1 GB</td><td class='num'>800 GB</td><td></td></tr>
+<tr><td>MCP</td><td class='num'>CT</td><td>byteme2</td><td><span class="state">running</span></td><td>mcpo · SearXNG</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>12.3 GB</td><td class='num'>75 GB</td><td></td></tr>
+<tr><td>AI-Sandbox</td><td class='num'>VM</td><td>byteme2</td><td><span class="state">running</span></td><td>computer-use and coding agents</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>8 GB</td><td class='num'>100 GB</td><td></td></tr>
+<tr><td>slerm-node01</td><td class='num'>VM</td><td>byteme2</td><td><span class="state off">on demand</span></td><td>CPU worker · 16c 12 GB</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>12 GB</td><td class='num'>40 GB</td><td><span class="tag slerm">slerm</span></td></tr>
+<tr><td>slerm-node02</td><td class='num'>VM</td><td>byteme2</td><td><span class="state off">on demand</span></td><td>CPU worker · 16c 12 GB</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>12 GB</td><td class='num'>40 GB</td><td><span class="tag slerm">slerm</span></td></tr>
+<tr><td>slerm-head</td><td class='num'>VM</td><td>byteme</td><td><span class="state">running</span></td><td>Slurm · NFS · LLM gateway</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>4 GB</td><td class='num'>40 GB</td><td><span class="tag slerm">slerm</span></td></tr>
+<tr><td>slerm-node04</td><td class='num'>VM</td><td>byteme</td><td><span class="state off">on demand</span></td><td>2× Tesla P100 · LLM router</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>45 GB</td><td class='num'>40 GB</td><td><span class="tag slerm">slerm</span></td></tr>
+<tr><td>slerm-node05</td><td class='num'>metal</td><td>deadlock</td><td><span class='state off'>on demand</span></td><td>CPU worker · the RAM node</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>32 GB</td><td class='num'>2.6 TB</td><td><span class='tag slerm'>slerm</span></td></tr>
+<tr><td>slerm-node03</td><td class='num'>VM</td><td>byteme3</td><td><span class='state off'>parked</span></td><td>CPU worker · off with its host</td><td><span class="net" style="--c: var(--srv)">srv</span></td><td class='num'>20 GB</td><td class='num'>40 GB</td><td><span class='tag slerm'>slerm</span></td></tr></tbody>
+    </table></div>
+    <div class="parked"><div><h3>Firewalls · 4</h3><p>pfSense ×2, OPNsense, FortiGate</p></div><div><h3>Windows lab · 19</h3><p>Windows Server and Windows 11 VMs, a lab domain controller, clone templates and a gaming VM</p></div><div><h3>Security · 4</h3><p>REMnux ×2, OSINT, sentinel</p></div><div><h3>Services · 13</h3><p>OwnCloud, Zabbix, Gitea, WordPress, Drupal, Plex, Pi-hole, a second DNS server, Grafana, Proxmox Datacenter Manager, a Proxmox dashboard, a homepage, 5eTools</p></div><div><h3>Projects and other · 14</h3><p>Ubuntu, Archangel, BlackPearl, Golem, Hivello, a five-VM Syslo lab with its client, the retired copy of slerm-node03, two more</p></div></div>
+  </section>
+
+  <section class="band" id="changes">
+    <div class="eyebrow">08 · Log</div>
+    <h2>Recent changes</h2>
+    <ol class="log"><li><time>11 Oct</time><span>gpt-oss 120B and Coder-Next get a 128k context.</span></li><li><time>10 Oct</time><span>byteme gets two 18-core Xeons and 64 GB. node04 grows to 36 vCPU and 45 GB, and the biggest models now keep their overflow on its own CPUs, so the CPU nodes stay asleep. A third Proxmox host, byteme3, is set up and then parked when its memory goes into byteme.</span></li><li><time>5 Oct</time><span>Open WebUI gets a Code mode: a coding agent that works on the AI-Sandbox VM.</span></li><li><time>4 Oct</time><span>Two Tesla P100s replace both slerm GPUs, both in node04: 32 GB of VRAM, and models run at 2.8 to 4.6 times the speed of the old pool.</span></li><li><time>1 Oct</time><span>Two planned pulls of the UPS plug. ups-guardian gets a round of fixes from them, and slerm now freezes its jobs the moment the UPS goes on battery.</span></li><li><time>29 Sep</time><span>Model staging copies a model to every node it will load on before it is needed. Two 9B models join the pool at about 25 tok/s.</span></li><li><time>28 Sep</time><span>The Pi lab wall goes up, and Open WebUI gets a computer-use agent that drives the AI-Sandbox desktop.</span></li><li><time>27 Sep</time><span>slerm goes dynamic: a gateway that holds requests while nodes wake, and an orchestrator that powers them off when idle. The power dashboard gets an outage console and an energy tracker.</span></li><li><time>21 Sep</time><span>The ESP8266 status fob.</span></li><li><time>19 Sep</time><span>Rack recabled. The same day a 48 s blackout ran the whole power-failure sequence for real.</span></li><li><time>9 Sep</time><span>deadlock joins slerm as node05, a bare-metal 32 GB RAM node.</span></li></ol>
+  </section>
+</main>
+<footer><div class="wrap">Built from live reads of the two running Proxmox hosts, Slurm, the UPS dashboard and
+ups-guardian on 12 Oct 2026. The Cloudflare and Tailscale parts were last read on 29 Sep. Addresses, port numbers,
+software versions and admin hostnames are left out on purpose. The topology was made with AI assistance.</div></footer>
+<script>
+(function () {
+  var root = document.documentElement;
+  var motionBox = document.getElementById('toggle-motion');
+  var size = document.querySelectorAll('.seg-ctl button');
+  function load(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function setSize(mode) {
+    root.classList.toggle('full', mode === 'full');
+    size.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.size === mode)); });
+    save('hm-size', mode);
+  }
+  size.forEach(function (b) { b.addEventListener('click', function () { setSize(b.dataset.size); }); });
+  setSize(load('hm-size', 'fit'));
+
+  // ---- motion. Packets are <g class="pk"> elements whose data-legs hold polylines ("x,y x,y;x,y x,y").
+  // A packet walks each leg at data-speed (svg units/s) and is hidden between legs, as if crossing a box.
+  var packets = [], heads = [], visible = new Map();
+  function pts(str) { return str.trim().split(/\s+/).map(function (p) { var a = p.split(','); return [+a[0], +a[1]]; }); }
+  function dist(a, b) { return Math.hypot(b[0] - a[0], b[1] - a[1]); }
+  document.querySelectorAll('svg.pz').forEach(function (svg) {
+    var pk = svg.querySelectorAll('.pk'), ph = svg.querySelectorAll('.ph');
+    if (!pk.length && !ph.length) return;
+    visible.set(svg, false);
+    pk.forEach(function (g) {
+      var speed = +g.dataset.speed, hold = +g.dataset.hold, colors = g.dataset.c.split(' ');
+      var legs = g.dataset.legs.split(';').map(function (str, i) {
+        var p = pts(str), cum = [0];
+        for (var k = 1; k < p.length; k++) cum.push(cum[k - 1] + dist(p[k - 1], p[k]));
+        return { p: p, cum: cum, len: cum[cum.length - 1], c: colors[i] || colors[0] };
+      });
+      var segs = [], t = 0;
+      legs.forEach(function (L, i) {
+        var d = Math.max(L.len / speed, 0.05);
+        segs.push({ leg: L, t0: t, d: d });
+        t += d;
+        if (i < legs.length - 1) t += Math.min(dist(L.p[L.p.length - 1], legs[i + 1].p[0]) / speed, 0.5) + hold;
+      });
+      packets.push({ svg: svg, g: g, segs: segs, period: t + (+g.dataset.rest), delay: +g.dataset.delay, cls: '' });
+    });
+    ph.forEach(function (g) {
+      var veil = g.querySelector('.ph-veil');
+      heads.push({ svg: svg, g: g, x0: +g.dataset.x0, x1: +g.dataset.x1, T: +g.dataset.t, veil: veil,
+        right: +veil.getAttribute('x') + +veil.getAttribute('width'), line: g.querySelector('.ph-line'),
+        tag: g.querySelector('.ph-tag'), txt: g.querySelector('.ph-t'), start: null, label: '' });
+    });
+  });
+
+  function at(L, s) {
+    var k = 1;
+    while (k < L.cum.length - 1 && L.cum[k] < s) k++;
+    var a = L.p[k - 1], b = L.p[k], f = (s - L.cum[k - 1]) / ((L.cum[k] - L.cum[k - 1]) || 1);
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+  }
+  function drawPacket(P, now) {
+    var u = ((now + P.delay) % P.period + P.period) % P.period;
+    for (var i = 0; i < P.segs.length; i++) {
+      var S = P.segs[i];
+      if (u >= S.t0 && u < S.t0 + S.d) {
+        var s = (u - S.t0) / S.d * S.leg.len, xy = at(S.leg, s);
+        P.g.setAttribute('transform', 'translate(' + xy[0].toFixed(1) + ' ' + xy[1].toFixed(1) + ')');
+        P.g.style.opacity = Math.max(0, Math.min(1, s / 10, (S.leg.len - s) / 10)).toFixed(2);
+        var cls = 'pk k-' + S.leg.c;
+        if (cls !== P.cls) { P.g.setAttribute('class', cls); P.cls = cls; }
+        return;
+      }
+    }
+    P.g.style.opacity = 0;
+  }
+  var SWEEP = 16, REST = 3;  // seconds: replay the first six minutes in 16 s, then show the whole chart
+  function drawHead(H, now) {
+    if (H.svg.classList.contains('rv-pending')) return;  // the replay waits until the chart has built
+    if (H.start === null) { H.start = now; H.g.classList.add('on'); }
+    var u = (now - H.start) % (SWEEP + REST), f = Math.min(u / SWEEP, 1);
+    var x = H.x0 + f * (H.x1 - H.x0), sec = Math.round(f * H.T);
+    H.g.style.opacity = u < SWEEP ? 1 : 0;
+    H.veil.setAttribute('x', x.toFixed(1));
+    H.veil.setAttribute('width', Math.max(0, H.right - x).toFixed(1));
+    H.line.setAttribute('x1', x.toFixed(1));
+    H.line.setAttribute('x2', x.toFixed(1));
+    H.tag.setAttribute('x', (x - 22).toFixed(1));
+    H.txt.setAttribute('x', x.toFixed(1));
+    var label = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    if (label !== H.label) { H.txt.textContent = label; H.label = label; }
+  }
+
+  var raf = 0, t0 = performance.now();
+  function frame(ts) {
+    raf = 0;
+    if (!root.classList.contains('motion')) return;
+    var now = (ts - t0) / 1000, any = false;
+    packets.forEach(function (P) { if (visible.get(P.svg)) { drawPacket(P, now); any = true; } });
+    heads.forEach(function (H) { if (visible.get(H.svg)) { drawHead(H, now); any = true; } });
+    if (any) raf = requestAnimationFrame(frame);
+  }
+  function kick() { if (!raf && root.classList.contains('motion')) raf = requestAnimationFrame(frame); }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { visible.set(e.target, e.isIntersecting); });
+      kick();
+    }, { rootMargin: '120px 0px' });
+    visible.forEach(function (_, svg) { io.observe(svg); });
+  } else {
+    visible.forEach(function (_, svg) { visible.set(svg, true); });
+  }
+
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  function setMotion(on, remember) {
+    root.classList.toggle('motion', on);
+    motionBox.checked = on;
+    if (remember) save('hm-motion', on ? '1' : '0');
+    kick();
+  }
+  motionBox.addEventListener('change', function () { setMotion(motionBox.checked, true); });
+  setMotion(load('hm-motion', reduce ? '0' : '1') === '1', false);
+
+  // ---- scroll reveal. Runs once, only with motion on, and only hides what starts below the fold, so the
+  // first screen is always complete. Diagram parts reveal one by one as their own height crosses the line,
+  // left to right within a row; text blocks and table rows settle in as they enter.
+  var BLOCKS = '.band > .eyebrow, .band > h2, .band > p, figcaption, .rules > div, ol.log li, .parked > div, ' +
+               '.table-scroll tr, footer .wrap';
+  var builds = [], blockIo = null;
+  function revealLine() { return window.innerHeight * 0.9; }
+  function startReveal() {
+    if (!('IntersectionObserver' in window)) return;
+    var L = revealLine();
+    blockIo = new IntersectionObserver(function (entries) {
+      var k = 0;
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        blockIo.unobserve(el);
+        if (el.tagName === 'SECTION') { el.classList.remove('rv-line'); return; }
+        el.style.setProperty('--d', Math.min(k++ * 0.07, 0.5) + 's');
+        el.classList.add('rv-go');
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll(BLOCKS).forEach(function (el) {
+      if (el.getBoundingClientRect().top < L) return;
+      el.classList.add('rv-b');
+      blockIo.observe(el);
+    });
+    document.querySelectorAll('section.band').forEach(function (el) {
+      if (el.getBoundingClientRect().top < L) return;
+      el.classList.add('rv-line');
+      blockIo.observe(el);
+    });
+    document.querySelectorAll('svg.pz').forEach(function (svg) {
+      var vb = svg.viewBox.baseVal, r = svg.getBoundingClientRect(), sc = r.height / vb.height, items = [];
+      if (r.bottom < L) return;
+      [].forEach.call(svg.children, function (el) {
+        var tag = el.tagName.toLowerCase(), bb;
+        if (tag === 'defs' || el.classList.contains('pk') || el.classList.contains('ph')) return;
+        try { bb = el.getBBox(); } catch (e) { return; }
+        if (r.top + bb.y * sc < L) return;
+        if (tag === 'line' || tag === 'path') {
+          try { el.style.setProperty('--len', el.getTotalLength().toFixed(1)); } catch (e) {}
+        }
+        if (el.style.animationDelay) el.dataset.rvDelay = el.style.animationDelay;
+        el.classList.add('rv-s');
+        items.push({ el: el, x: bb.x, y: bb.y });
+      });
+      if (!items.length) return;
+      items.sort(function (a, b) { return a.y - b.y; });
+      svg.classList.add('rv-pending');
+      builds.push({ svg: svg, items: items, i: 0, w: vb.width, h: vb.height });
+    });
+    root.classList.add('rv-on');
+    if (builds.length) {
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      onScroll();
+    }
+  }
+  var ticking = false;
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(sweep); } }
+  function sweep() {
+    ticking = false;
+    var L = revealLine();
+    builds = builds.filter(function (B) {
+      var r = B.svg.getBoundingClientRect(), sc = r.height / B.h;
+      while (B.i < B.items.length && r.top + B.items[B.i].y * sc < L) {
+        var it = B.items[B.i++];
+        it.el.style.animationDelay = (it.x / B.w * 0.45).toFixed(3) + 's';
+        it.el.classList.remove('rv-s');
+        it.el.classList.add('rv-in');
+      }
+      if (B.i < B.items.length) return true;
+      setTimeout(function () { B.svg.classList.remove('rv-pending'); kick(); }, 1000);
+      return false;
+    });
+    if (!builds.length) {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    }
+  }
+  // once an element has settled, give it back its resting style (and the breathing dots their own stagger)
+  document.addEventListener('animationend', function (e) {
+    var el = e.target;
+    if (!el.classList || !el.classList.contains('rv-in')) return;
+    el.classList.remove('rv-in');
+    el.style.removeProperty('--len');
+    el.style.animationDelay = el.dataset.rvDelay || '';
+  });
+  document.addEventListener('transitionend', function (e) {
+    var el = e.target;
+    if (e.propertyName !== 'translate' || !el.classList || !el.classList.contains('rv-go')) return;
+    el.classList.remove('rv-b', 'rv-go');
+    el.style.removeProperty('--d');
+  });
+  function stopReveal() {
+    root.classList.remove('rv-on');
+    if (blockIo) blockIo.disconnect();
+    builds.forEach(function (B) { B.svg.classList.remove('rv-pending'); });
+    builds = [];
+  }
+  motionBox.addEventListener('change', function () { if (!motionBox.checked) stopReveal(); });
+  if (root.classList.contains('motion')) startReveal();
+})();
+</script>

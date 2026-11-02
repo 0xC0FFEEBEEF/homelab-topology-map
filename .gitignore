@@ -1,0 +1,3 @@
+__pycache__/
+# the pre-scrub build with addresses stays local
+private-*/

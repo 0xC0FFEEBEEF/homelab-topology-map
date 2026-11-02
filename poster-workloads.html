@@ -1,0 +1,128 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>slerm workloads</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  /* Layout: one long page on pitch black. Open bands split by hairlines; figures fill the column and
+     can switch to full size with sideways scroll. Colour means network, violet means slerm. */
+  --bg: #000000;
+  --card: #06080c;
+  --raise: #0e1118;
+  --line: #1b2029;
+  --line-2: #2a313d;
+  --text: #e7ecf3;
+  --text-2: #a4aebd;
+  --muted: #677284;
+  --accent: #8ea8ff;
+  --violet: #b69bff;
+  --violet-wash: rgba(182,155,255,.12);
+  --lan: #3ddc97;
+  --mgmt: #f3b64b;
+  --srv: #8ea8ff;
+  --dmz: #ff7a90;
+  --bad: #ff6b6b;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --ease: cubic-bezier(.2,.8,.2,1);
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--text); }
+body { margin: 0; font: 15px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+
+/* svg */
+.pz { display: block; height: auto; }
+.pz text { font-family: var(--sans); font-size: 12.5px; fill: var(--text-2); }
+.pz .m { font-family: var(--mono); font-size: 11px; }
+.pz .sm { font-size: 12.5px; }
+.pz .xs { font-size: 10.5px; }
+.pz .ey { font-size: 10px; letter-spacing: .14em; font-weight: 500; fill: var(--muted); }
+.pz .ti { font-size: 17px; font-weight: 600; fill: var(--text); letter-spacing: -.01em; }
+.pz .nm { font-size: 13px; font-weight: 600; fill: var(--text); }
+.pz .big { font-size: 30px; font-weight: 600; fill: var(--text); letter-spacing: -.02em; }
+.pz .mu, .pz tspan.mu { fill: var(--muted); }
+.pz .tx { fill: var(--text); }
+.pz .card { fill: var(--card); stroke: var(--line-2); stroke-width: 1; }
+.pz .frame { fill: none; }
+.pz .card-hi { stroke: #3a4352; }
+.pz .parked-card { stroke-dasharray: 4 4; }
+.pz .hr { stroke: var(--line); stroke-width: 1; }
+.pz .grid { stroke: var(--line); stroke-width: 1; }
+.pz .w { fill: none; stroke-width: 2.25; stroke-linecap: round; }
+.pz .stub { fill: none; stroke-width: 3; stroke-linecap: round; }
+.pz .halo { fill: none; stroke: var(--bg); stroke-width: 9; }
+.pz .nt { fill: none; stroke: var(--muted); stroke-width: 1.25; }
+.pz .dash { stroke-dasharray: 5 5; }
+.pz .req { fill: none; stroke: var(--violet); stroke-width: 1.75; }
+.pz .ah { fill: var(--muted); }
+.pz .pw-b { fill: none; stroke: var(--text-2); stroke-width: 2; }
+.pz .pw-s { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.pz .psu { fill: var(--text-2); }
+.pz .st-run { fill: var(--text); }
+.pz .st-off { fill: var(--bg); stroke: var(--text-2); stroke-width: 1.25; }
+.pz .pill { fill: none; stroke-width: 1; }
+.pz .p-tun { stroke: var(--line-2); }
+.pz .pt-tun { fill: var(--text-2); }
+.pz .p-slerm { stroke: var(--violet); }
+.pz .pt-slerm { fill: var(--violet); }
+.pz .p-state { stroke: var(--line-2); fill: var(--card); }
+.pz .s-lan { stroke: var(--lan); } .pz .f-lan { fill: var(--lan); }
+.pz .s-mgmt { stroke: var(--mgmt); } .pz .f-mgmt { fill: var(--mgmt); }
+.pz .s-srv { stroke: var(--srv); } .pz .f-srv { fill: var(--srv); }
+.pz .s-dmz { stroke: var(--dmz); } .pz .f-dmz { fill: var(--dmz); }
+.pz .seg { stroke: none; }
+.pz .gpu1 { fill: var(--violet); } .pz .gpu2 { fill: #8f74e0; }
+.pz .cpu1 { fill: #5d6678; } .pz .cpu2 { fill: #4b5364; } .pz .cpu3 { fill: #7a8499; }
+.pz .seg-t { fill: #0b0d12; font-weight: 500; }
+.pz .bar { fill: var(--violet); }
+.pz .b-wait { fill: #3a4352; }
+.pz .b-off { fill: var(--text-2); }
+.pz .b-keep { fill: #1c2230; stroke: var(--line-2); }
+.pz .b-slerm { fill: rgba(182,155,255,.16); stroke: rgba(182,155,255,.45); }
+.pz .b-keep + text, .pz .b-slerm + text { fill: var(--text-2); }
+.pz .deadline { stroke: var(--bad); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.pz .dl { fill: var(--bad); }
+
+/* motion: packets ride the wires, running dots breathe, tunnels march, the outage replays.
+   Everything here is off unless the page sets .motion on the root, so the PNG posters stay still. */
+.pz .pk { pointer-events: none; }
+:root:not(.motion) .pz .pk { display: none; }
+.pz .pk-c { fill: currentColor; }
+.pz .pk-h { fill: currentColor; opacity: .2; }
+.pz .k-text { color: var(--text); } .pz .k-power { color: var(--text-2); } .pz .k-violet { color: var(--violet); }
+.pz .k-lan { color: var(--lan); } .pz .k-mgmt { color: var(--mgmt); }
+.pz .k-srv { color: var(--srv); } .pz .k-dmz { color: var(--dmz); }
+.pz .ph { display: none; pointer-events: none; transition: opacity .6s var(--ease); }
+.motion .pz .ph.on { display: inline; }
+.pz .ph-veil { fill: var(--bg); opacity: .62; }
+.pz .ph-line { stroke: var(--text); stroke-width: 1.25; }
+.pz .ph-tag { fill: var(--text); }
+.pz .ph-t { font-family: var(--mono); font-size: 10.5px; font-weight: 500; fill: var(--bg); }
+.motion .pz .st-run { animation: breathe 3.6s ease-in-out infinite; }
+.motion .pz .dash { animation: march 1.6s linear infinite; }
+.motion .pz .p-state { animation: state-on 10s linear infinite; }
+@keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes march { to { stroke-dashoffset: 10; } }
+@keyframes state-on {
+  0%, 22% { stroke: var(--violet); fill: var(--violet-wash); }
+  26%, 100% { stroke: var(--line-2); fill: var(--card); }
+}
+
+/* scroll reveal: the page hides only what starts below the fold (.rv-on on the root), then builds each
+   diagram as it scrolls in. Cards rise, wires draw, bars grow, text settles; traffic starts when it's done. */
+.rv-on .pz .rv-s { opacity: 0; animation: none; }
+.rv-on .pz .rv-in { animation: rv-fade .55s var(--ease) both; }
+.rv-on .pz text.rv-in { animation-name: rv-rise; animation-duration: .65s; }
+.rv-on .pz .card.rv-in { animation: rv-card .75s var(--ease) both; transform-box: fill-box; transform-origin: 50% 50%; }
+.rv-on .pz line.rv-in.w, .rv-on .pz line.rv-in.req, .rv-on .pz line.rv-in.pw-b,
+.rv-on .pz line.rv-in.nt:not(.dash), .rv-on .pz path.rv-in.nt {
+  stroke-dasharray: var(--len) var(--len); animation: rv-draw .95s var(--ease) both; }
+.rv-on .pz .rv-in.b-wait, .rv-on .pz .rv-in.b-off, .rv-on .pz .rv-in.b-keep, .rv-on .pz .rv-in.b-slerm,
+.rv-on .pz .rv-in.bar, .rv-on .pz .rv-in.seg {
+  animation: rv-grow .9s var(--ease) both; transform-box: fill-box; transform-origin: 0 50%; }
+.rv-on .pz.rv-pending .pk, .rv-on .pz.rv-pending .ph { visibility: hidden; }
+@keyframes rv-fade { from { opacity: 0; } }
+@keyframes rv-rise { from { opacity: 0; translate: 0 8px; } }
+@keyframes rv-card { from { opacity: 0; scale: .96; } }
+@keyframes rv-draw { 0% { stroke-dashoffset: var(--len); opacity: 0; } 25% { opacity: 1; } }
+@keyframes rv-grow { from { scale: 0 1; } }
+ body { margin: 0; } .pz { width: auto; }</style></head>
+<body><svg class="pz " viewBox="0 0 1680 756" width="1680" height="756" role="img" aria-label="slerm workloads: Slurm on slerm-head runs NOAA radar processing, Wazuh alert analysis, LLM serving and software builds as jobs on the compute and gpu partitions." data-w="1680"><defs><marker id="ah-slerm-work" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="60" y="62" class="big">slerm<tspan class="mu"> workloads</tspan></text><text x="60" y="90" class="sm mu">Slurm · five nodes on four machines · every workload is a Slurm job, submitted from the head</text><circle cx="1334" cy="36" r="3.5" class="st-run" style="animation-delay:-1.37s"/><text x="1344" y="40" class="sm">running now</text><circle cx="1444" cy="36" r="3.5" class="st-off"/><text x="1454" y="40" class="sm">powered off until needed</text><text x="76" y="164" class="ey">VM ON BYTEME · ROCKY LINUX · 2 vCPU · 4 GB</text><circle cx="80" cy="186" r="3.5" class="st-run" style="animation-delay:-2.74s"/><text x="92" y="190" class="ti">slerm-head</text><line x1="61" y1="208" x2="439" y2="208" class="hr"/><text x="76" y="236" class="nm">Slurm</text><text x="188" y="236" class="sm">slurmctld + slurmdbd on MariaDB</text><text x="76" y="280" class="nm">panel</text><text x="188" y="280" class="sm">submits, schedules and watches jobs</text><line x1="76" y1="254" x2="424" y2="254" class="hr"/><text x="76" y="324" class="nm">slerm-orch</text><text x="188" y="324" class="sm">LLM gateway · powers nodes</text><line x1="76" y1="298" x2="424" y2="298" class="hr"/><text x="76" y="368" class="nm">NFS · 700 GB</text><text x="188" y="368" class="sm">data, apps and home directories</text><line x1="76" y1="342" x2="424" y2="342" class="hr"/><rect x="60" y="140" width="380" height="258" rx="10" class="card frame"/><text x="60" y="442" class="ey">PARTITIONS</text><rect x="60" y="458" width="380" height="132" rx="10" class="card frame"/><text x="76" y="484" class="nm">compute</text><circle cx="80" cy="506" r="3.5" class="st-off"/><text x="92" y="510" class="sm tx">node01</text><text x="164" y="510" class="sm mu">byteme2 · 16 vCPU · 12 GB</text><circle cx="80" cy="528" r="3.5" class="st-off"/><text x="92" y="532" class="sm tx">node02</text><text x="164" y="532" class="sm mu">byteme2 · 16 vCPU · 12 GB</text><circle cx="80" cy="550" r="3.5" class="st-off"/><text x="92" y="554" class="sm tx">node05</text><text x="164" y="554" class="sm mu">deadlock · 8 threads · 32 GB</text><circle cx="80" cy="572" r="3.5" class="st-off"/><text x="92" y="576" class="sm tx">node03</text><text x="164" y="576" class="sm mu">byteme3 · 24 vCPU · 20 GB · parked</text><rect x="60" y="604" width="380" height="66" rx="10" class="card frame"/><text x="76" y="630" class="nm">gpu</text><circle cx="80" cy="652" r="3.5" class="st-off"/><text x="92" y="656" class="sm tx">node04</text><text x="164" y="656" class="sm mu">byteme · 36 vCPU · 45 GB</text><text x="520" y="144" class="ey">SOURCE</text><text x="904" y="144" class="ey">SLURM JOB</text><text x="1288" y="144" class="ey">RESULT</text><text x="520" y="184" class="nm">NOAA radar<tspan class="mu">  ·  storms and wind, scan by scan</tspan></text><rect x="520" y="196" width="350" height="92" rx="10" class="card frame"/><text x="536" y="222" class="nm">NOAA open data</text><text x="536" y="244" class="sm">NEXRAD Level II radar scans</text><text x="536" y="263" class="sm mu">HRRR wind analysis</text><rect x="904" y="196" width="350" height="92" rx="10" class="card frame"/><text x="920" y="222" class="nm">Array job, one task per scan</text><text x="920" y="244" class="sm">Py-ART decode + matplotlib, CPU only</text><rect x="920" y="260" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="947" y="271" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="979" y="260" width="30" height="15" rx="7.5" class="pill p-tun"/><text x="994" y="271" class="m xs pt-tun" text-anchor="middle">gpu</text><rect x="1288" y="196" width="350" height="92" rx="10" class="card frame"/><text x="1304" y="222" class="nm">Five products as GIF loops</text><text x="1304" y="244" class="sm">reflectivity · rotation · storm cells</text><text x="1304" y="263" class="sm mu">wind profiles · US wind · the lab wall radar</text><line x1="874" y1="242" x2="898" y2="242" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="1258" y1="242" x2="1282" y2="242" class="nt" marker-end="url(#ah-slerm-work)"/><text x="520" y="320" class="nm">Wazuh analysis<tspan class="mu">  ·  security alerts against their own baseline</tspan></text><rect x="520" y="332" width="350" height="92" rx="10" class="card frame"/><text x="536" y="358" class="nm">Wuzah, the home Wazuh manager</text><text x="536" y="380" class="sm">alert snapshot saved as JSONL</text><text x="536" y="399" class="sm mu">or a CSV export dropped into the panel</text><rect x="904" y="332" width="350" height="92" rx="10" class="card frame"/><text x="920" y="358" class="nm">Array of counter shards</text><text x="920" y="380" class="sm">then one dependent job reduces them</text><rect x="920" y="396" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="947" y="407" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="1288" y="332" width="350" height="92" rx="10" class="card frame"/><text x="1304" y="358" class="nm">Report of detector findings</text><text x="1304" y="380" class="sm">one baseline over the whole window</text><text x="1304" y="399" class="sm mu">AI triage on the LLM router</text><line x1="874" y1="378" x2="898" y2="378" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="1258" y1="378" x2="1282" y2="378" class="nt" marker-end="url(#ah-slerm-work)"/><text x="520" y="456" class="nm">LLM serving<tspan class="mu">  ·  local models behind one OpenAI-style endpoint</tspan></text><rect x="520" y="468" width="350" height="92" rx="10" class="card frame"/><text x="536" y="494" class="nm">Open WebUI, opencode, agents</text><text x="536" y="516" class="sm">zsh-ai, Firstlook, Wazuh triage</text><text x="536" y="535" class="sm mu">all through the gateway on the head</text><rect x="904" y="468" width="350" height="92" rx="10" class="card frame"/><text x="920" y="494" class="nm">llama.cpp router job on node04</text><text x="920" y="516" class="sm">both P100s · CPU workers on demand</text><rect x="920" y="532" width="30" height="15" rx="7.5" class="pill p-tun"/><text x="935" y="543" class="m xs pt-tun" text-anchor="middle">gpu</text><rect x="1288" y="468" width="350" height="92" rx="10" class="card frame"/><text x="1304" y="494" class="nm">Answers back through the gateway</text><text x="1304" y="516" class="sm">nodes power off when nothing asks</text><text x="1304" y="535" class="sm mu">in detail in the next diagram</text><line x1="874" y1="514" x2="898" y2="514" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="1258" y1="514" x2="1282" y2="514" class="nt" marker-end="url(#ah-slerm-work)"/><text x="520" y="592" class="nm">Builds<tspan class="mu">  ·  software compiled on the nodes that run it</tspan></text><rect x="520" y="604" width="350" height="92" rx="10" class="card frame"/><text x="536" y="630" class="nm">Source on the shared NFS</text><text x="536" y="652" class="sm">llama.cpp with the P100 patches</text><text x="536" y="671" class="sm mu">desktop apps packaged as AppImages</text><rect x="904" y="604" width="350" height="92" rx="10" class="card frame"/><text x="920" y="630" class="nm">Build and test jobs</text><text x="920" y="652" class="sm">CUDA builds and P100 tests need the cards</text><rect x="920" y="668" width="54" height="15" rx="7.5" class="pill p-tun"/><text x="947" y="679" class="m xs pt-tun" text-anchor="middle">compute</text><rect x="979" y="668" width="30" height="15" rx="7.5" class="pill p-tun"/><text x="994" y="679" class="m xs pt-tun" text-anchor="middle">gpu</text><rect x="1288" y="604" width="350" height="92" rx="10" class="card frame"/><text x="1304" y="630" class="nm">Binaries back on the NFS</text><text x="1304" y="652" class="sm">router builds tuned for Pascal</text><text x="1304" y="671" class="sm mu">AppImages for the desktop</text><line x1="874" y1="650" x2="898" y2="650" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="1258" y1="650" x2="1282" y2="650" class="nt" marker-end="url(#ah-slerm-work)"/><line x1="440" y1="232" x2="486" y2="232" class="req"/><line x1="486" y1="232" x2="486" y2="588" class="req"/><line x1="486" y1="180" x2="510" y2="180" class="req" marker-end="url(#ah-slerm-work)"/><line x1="486" y1="316" x2="510" y2="316" class="req" marker-end="url(#ah-slerm-work)"/><line x1="486" y1="452" x2="510" y2="452" class="req" marker-end="url(#ah-slerm-work)"/><line x1="486" y1="588" x2="510" y2="588" class="req" marker-end="url(#ah-slerm-work)"/><text x="60" y="726" class="sm">Every workload is an ordinary Slurm job, so they share the nodes and Slurm keeps their CPU, memory and GPU requests apart. Radar arrays ask for no GPU, so the LLM router can still get both cards.</text><g class="pk" data-legs="874,242 898,242;1258,242 1282,242" data-c="violet violet" data-speed="90" data-delay="0" data-rest="6" data-hold="0.5"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="874,378 898,378;1258,378 1282,378" data-c="violet violet" data-speed="90" data-delay="1.9" data-rest="6" data-hold="0.5"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="874,514 898,514;1258,514 1282,514" data-c="violet violet" data-speed="90" data-delay="3.8" data-rest="6" data-hold="0.5"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="874,650 898,650;1258,650 1282,650" data-c="violet violet" data-speed="90" data-delay="5.7" data-rest="6" data-hold="0.5"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g></svg></body></html>

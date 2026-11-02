@@ -1,0 +1,128 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>public edge</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  /* Layout: one long page on pitch black. Open bands split by hairlines; figures fill the column and
+     can switch to full size with sideways scroll. Colour means network, violet means slerm. */
+  --bg: #000000;
+  --card: #06080c;
+  --raise: #0e1118;
+  --line: #1b2029;
+  --line-2: #2a313d;
+  --text: #e7ecf3;
+  --text-2: #a4aebd;
+  --muted: #677284;
+  --accent: #8ea8ff;
+  --violet: #b69bff;
+  --violet-wash: rgba(182,155,255,.12);
+  --lan: #3ddc97;
+  --mgmt: #f3b64b;
+  --srv: #8ea8ff;
+  --dmz: #ff7a90;
+  --bad: #ff6b6b;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  --ease: cubic-bezier(.2,.8,.2,1);
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--text); }
+body { margin: 0; font: 15px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+
+/* svg */
+.pz { display: block; height: auto; }
+.pz text { font-family: var(--sans); font-size: 12.5px; fill: var(--text-2); }
+.pz .m { font-family: var(--mono); font-size: 11px; }
+.pz .sm { font-size: 12.5px; }
+.pz .xs { font-size: 10.5px; }
+.pz .ey { font-size: 10px; letter-spacing: .14em; font-weight: 500; fill: var(--muted); }
+.pz .ti { font-size: 17px; font-weight: 600; fill: var(--text); letter-spacing: -.01em; }
+.pz .nm { font-size: 13px; font-weight: 600; fill: var(--text); }
+.pz .big { font-size: 30px; font-weight: 600; fill: var(--text); letter-spacing: -.02em; }
+.pz .mu, .pz tspan.mu { fill: var(--muted); }
+.pz .tx { fill: var(--text); }
+.pz .card { fill: var(--card); stroke: var(--line-2); stroke-width: 1; }
+.pz .frame { fill: none; }
+.pz .card-hi { stroke: #3a4352; }
+.pz .parked-card { stroke-dasharray: 4 4; }
+.pz .hr { stroke: var(--line); stroke-width: 1; }
+.pz .grid { stroke: var(--line); stroke-width: 1; }
+.pz .w { fill: none; stroke-width: 2.25; stroke-linecap: round; }
+.pz .stub { fill: none; stroke-width: 3; stroke-linecap: round; }
+.pz .halo { fill: none; stroke: var(--bg); stroke-width: 9; }
+.pz .nt { fill: none; stroke: var(--muted); stroke-width: 1.25; }
+.pz .dash { stroke-dasharray: 5 5; }
+.pz .req { fill: none; stroke: var(--violet); stroke-width: 1.75; }
+.pz .ah { fill: var(--muted); }
+.pz .pw-b { fill: none; stroke: var(--text-2); stroke-width: 2; }
+.pz .pw-s { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.pz .psu { fill: var(--text-2); }
+.pz .st-run { fill: var(--text); }
+.pz .st-off { fill: var(--bg); stroke: var(--text-2); stroke-width: 1.25; }
+.pz .pill { fill: none; stroke-width: 1; }
+.pz .p-tun { stroke: var(--line-2); }
+.pz .pt-tun { fill: var(--text-2); }
+.pz .p-slerm { stroke: var(--violet); }
+.pz .pt-slerm { fill: var(--violet); }
+.pz .p-state { stroke: var(--line-2); fill: var(--card); }
+.pz .s-lan { stroke: var(--lan); } .pz .f-lan { fill: var(--lan); }
+.pz .s-mgmt { stroke: var(--mgmt); } .pz .f-mgmt { fill: var(--mgmt); }
+.pz .s-srv { stroke: var(--srv); } .pz .f-srv { fill: var(--srv); }
+.pz .s-dmz { stroke: var(--dmz); } .pz .f-dmz { fill: var(--dmz); }
+.pz .seg { stroke: none; }
+.pz .gpu1 { fill: var(--violet); } .pz .gpu2 { fill: #8f74e0; }
+.pz .cpu1 { fill: #5d6678; } .pz .cpu2 { fill: #4b5364; } .pz .cpu3 { fill: #7a8499; }
+.pz .seg-t { fill: #0b0d12; font-weight: 500; }
+.pz .bar { fill: var(--violet); }
+.pz .b-wait { fill: #3a4352; }
+.pz .b-off { fill: var(--text-2); }
+.pz .b-keep { fill: #1c2230; stroke: var(--line-2); }
+.pz .b-slerm { fill: rgba(182,155,255,.16); stroke: rgba(182,155,255,.45); }
+.pz .b-keep + text, .pz .b-slerm + text { fill: var(--text-2); }
+.pz .deadline { stroke: var(--bad); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.pz .dl { fill: var(--bad); }
+
+/* motion: packets ride the wires, running dots breathe, tunnels march, the outage replays.
+   Everything here is off unless the page sets .motion on the root, so the PNG posters stay still. */
+.pz .pk { pointer-events: none; }
+:root:not(.motion) .pz .pk { display: none; }
+.pz .pk-c { fill: currentColor; }
+.pz .pk-h { fill: currentColor; opacity: .2; }
+.pz .k-text { color: var(--text); } .pz .k-power { color: var(--text-2); } .pz .k-violet { color: var(--violet); }
+.pz .k-lan { color: var(--lan); } .pz .k-mgmt { color: var(--mgmt); }
+.pz .k-srv { color: var(--srv); } .pz .k-dmz { color: var(--dmz); }
+.pz .ph { display: none; pointer-events: none; transition: opacity .6s var(--ease); }
+.motion .pz .ph.on { display: inline; }
+.pz .ph-veil { fill: var(--bg); opacity: .62; }
+.pz .ph-line { stroke: var(--text); stroke-width: 1.25; }
+.pz .ph-tag { fill: var(--text); }
+.pz .ph-t { font-family: var(--mono); font-size: 10.5px; font-weight: 500; fill: var(--bg); }
+.motion .pz .st-run { animation: breathe 3.6s ease-in-out infinite; }
+.motion .pz .dash { animation: march 1.6s linear infinite; }
+.motion .pz .p-state { animation: state-on 10s linear infinite; }
+@keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes march { to { stroke-dashoffset: 10; } }
+@keyframes state-on {
+  0%, 22% { stroke: var(--violet); fill: var(--violet-wash); }
+  26%, 100% { stroke: var(--line-2); fill: var(--card); }
+}
+
+/* scroll reveal: the page hides only what starts below the fold (.rv-on on the root), then builds each
+   diagram as it scrolls in. Cards rise, wires draw, bars grow, text settles; traffic starts when it's done. */
+.rv-on .pz .rv-s { opacity: 0; animation: none; }
+.rv-on .pz .rv-in { animation: rv-fade .55s var(--ease) both; }
+.rv-on .pz text.rv-in { animation-name: rv-rise; animation-duration: .65s; }
+.rv-on .pz .card.rv-in { animation: rv-card .75s var(--ease) both; transform-box: fill-box; transform-origin: 50% 50%; }
+.rv-on .pz line.rv-in.w, .rv-on .pz line.rv-in.req, .rv-on .pz line.rv-in.pw-b,
+.rv-on .pz line.rv-in.nt:not(.dash), .rv-on .pz path.rv-in.nt {
+  stroke-dasharray: var(--len) var(--len); animation: rv-draw .95s var(--ease) both; }
+.rv-on .pz .rv-in.b-wait, .rv-on .pz .rv-in.b-off, .rv-on .pz .rv-in.b-keep, .rv-on .pz .rv-in.b-slerm,
+.rv-on .pz .rv-in.bar, .rv-on .pz .rv-in.seg {
+  animation: rv-grow .9s var(--ease) both; transform-box: fill-box; transform-origin: 0 50%; }
+.rv-on .pz.rv-pending .pk, .rv-on .pz.rv-pending .ph { visibility: hidden; }
+@keyframes rv-fade { from { opacity: 0; } }
+@keyframes rv-rise { from { opacity: 0; translate: 0 8px; } }
+@keyframes rv-card { from { opacity: 0; scale: .96; } }
+@keyframes rv-draw { 0% { stroke-dashoffset: var(--len); opacity: 0; } 25% { opacity: 1; } }
+@keyframes rv-grow { from { scale: 0 1; } }
+ body { margin: 0; } .pz { width: auto; }</style></head>
+<body><svg class="pz " viewBox="0 0 1360 528" width="1360" height="528" role="img" aria-label="How outside traffic reaches the lab and what the lab sends out: six paths, each a chain from source to destination with the transport on every hop." data-w="1360"><defs><marker id="ah-edge" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><text x="16" y="40" class="nm">Website status</text><text x="16" y="58" class="sm mu">live lab numbers</text><rect x="206" y="16" width="190" height="56" rx="10" class="card frame"/><text x="220" y="40" class="nm">Raspberry Pi 3B</text><text x="220" y="58" class="sm mu">status API · Proxmox + UPS</text><line x1="402" y1="44" x2="514" y2="44" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="36" class="m xs mu" text-anchor="middle">HTTP</text><text x="458" y="60" class="m xs mu" text-anchor="middle">on the LAN</text><rect x="522" y="16" width="190" height="56" rx="10" class="card frame"/><text x="536" y="40" class="nm">cloudflared on CFT</text><text x="536" y="58" class="sm mu">tunnel to Cloudflare</text><line x1="718" y1="44" x2="830" y2="44" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="36" class="m xs mu" text-anchor="middle">outbound</text><text x="774" y="60" class="m xs mu" text-anchor="middle">tunnel</text><rect x="838" y="16" width="190" height="56" rx="10" class="card frame"/><text x="852" y="40" class="nm">Worker nbdevlab</text><text x="852" y="58" class="sm mu">reads it through the tunnel</text><line x1="1034" y1="44" x2="1146" y2="44" class="nt" marker-end="url(#ah-edge)"/><text x="1090" y="36" class="m xs mu" text-anchor="middle">JSON</text><text x="1090" y="60" class="m xs mu" text-anchor="middle">per visit</text><rect x="1154" y="16" width="190" height="56" rx="10" class="card frame"/><text x="1168" y="40" class="nm">nbdevlab.com/status</text><text x="1168" y="58" class="sm mu">visitor&#x27;s browser</text><line x1="16" y1="88" x2="1344" y2="88" class="hr"/><text x="16" y="124" class="nm">Weather</text><text x="16" y="142" class="sm mu">Tempest on the site</text><rect x="206" y="100" width="190" height="56" rx="10" class="card frame"/><text x="220" y="124" class="nm">Tempest station</text><text x="220" y="142" class="sm mu">hub on Wi-Fi</text><line x1="402" y1="128" x2="514" y2="128" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="120" class="m xs mu" text-anchor="middle">uploads</text><rect x="522" y="100" width="190" height="56" rx="10" class="card frame"/><text x="536" y="124" class="nm">WeatherFlow API</text><text x="536" y="142" class="sm mu">cloud REST</text><line x1="718" y1="128" x2="830" y2="128" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="120" class="m xs mu" text-anchor="middle">token auth</text><rect x="838" y="100" width="190" height="56" rx="10" class="card frame"/><text x="852" y="124" class="nm">Worker nbdevlab</text><text x="852" y="142" class="sm mu">stores history in D1</text><line x1="1034" y1="128" x2="1146" y2="128" class="nt" marker-end="url(#ah-edge)"/><text x="1090" y="120" class="m xs mu" text-anchor="middle">JSON</text><text x="1090" y="144" class="m xs mu" text-anchor="middle">+ trends</text><rect x="1154" y="100" width="190" height="56" rx="10" class="card frame"/><text x="1168" y="124" class="nm">nbdevlab.com/weather</text><text x="1168" y="142" class="sm mu">visitor&#x27;s browser</text><line x1="16" y1="172" x2="1344" y2="172" class="hr"/><text x="16" y="208" class="nm">Media</text><text x="16" y="226" class="sm mu">home stays closed</text><rect x="206" y="184" width="190" height="56" rx="10" class="card frame"/><text x="220" y="208" class="nm">Viewer</text><text x="220" y="226" class="sm mu">anywhere</text><line x1="402" y1="212" x2="514" y2="212" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="204" class="m xs mu" text-anchor="middle">HTTPS</text><rect x="522" y="184" width="190" height="56" rx="10" class="card frame"/><text x="536" y="208" class="nm">Oracle VPS</text><text x="536" y="226" class="sm mu">Caddy · Let&#x27;s Encrypt</text><line x1="718" y1="212" x2="830" y2="212" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="204" class="m xs mu" text-anchor="middle">WireGuard</text><text x="774" y="228" class="m xs mu" text-anchor="middle">dialed from home</text><rect x="838" y="184" width="190" height="56" rx="10" class="card frame"/><text x="852" y="208" class="nm">Jellyfin VM</text><text x="852" y="226" class="sm mu">isolated DMZ</text><line x1="16" y1="256" x2="1344" y2="256" class="hr"/><text x="16" y="292" class="nm">Admin · tailnet</text><text x="16" y="310" class="sm mu">whole LAN, anywhere</text><rect x="206" y="268" width="190" height="56" rx="10" class="card frame"/><text x="220" y="292" class="nm">Ghost or phone</text><text x="220" y="310" class="sm mu">anywhere</text><line x1="402" y1="296" x2="514" y2="296" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="288" class="m xs mu" text-anchor="middle">Tailscale</text><text x="458" y="312" class="m xs mu" text-anchor="middle">direct WireGuard</text><rect x="522" y="268" width="190" height="56" rx="10" class="card frame"/><text x="536" y="292" class="nm">byteme2 · CFT</text><text x="536" y="310" class="sm mu">subnet routers</text><line x1="718" y1="296" x2="830" y2="296" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="288" class="m xs mu" text-anchor="middle">routed</text><rect x="838" y="268" width="190" height="56" rx="10" class="card frame"/><text x="852" y="292" class="nm">The lab</text><text x="852" y="310" class="sm mu">names via Technitium</text><line x1="16" y1="340" x2="1344" y2="340" class="hr"/><text x="16" y="376" class="nm">Admin · browser</text><text x="16" y="394" class="sm mu">UIs behind Access</text><rect x="206" y="352" width="190" height="56" rx="10" class="card frame"/><text x="220" y="376" class="nm">Browser</text><text x="220" y="394" class="sm mu">anywhere</text><line x1="402" y1="380" x2="514" y2="380" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="372" class="m xs mu" text-anchor="middle">HTTPS</text><rect x="522" y="352" width="190" height="56" rx="10" class="card frame"/><text x="536" y="376" class="nm">Cloudflare Access</text><text x="536" y="394" class="sm mu">Zero Trust login</text><line x1="718" y1="380" x2="830" y2="380" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="372" class="m xs mu" text-anchor="middle">tunnel</text><rect x="838" y="352" width="190" height="56" rx="10" class="card frame"/><text x="852" y="376" class="nm">cloudflared</text><text x="852" y="394" class="sm mu">outbound tunnel</text><line x1="1034" y1="380" x2="1146" y2="380" class="nt" marker-end="url(#ah-edge)"/><text x="1090" y="372" class="m xs mu" text-anchor="middle">LAN</text><rect x="1154" y="352" width="190" height="56" rx="10" class="card frame"/><text x="1168" y="376" class="nm">Admin UIs</text><text x="1168" y="394" class="sm mu">on the LAN</text><line x1="16" y1="424" x2="1344" y2="424" class="hr"/><text x="16" y="460" class="nm">VPS monitoring</text><text x="16" y="478" class="sm mu">the VPS reports home</text><rect x="206" y="436" width="190" height="56" rx="10" class="card frame"/><text x="220" y="460" class="nm">Oracle VPS</text><text x="220" y="478" class="sm mu">Wazuh agent</text><line x1="402" y1="464" x2="514" y2="464" class="nt" marker-end="url(#ah-edge)"/><text x="458" y="456" class="m xs mu" text-anchor="middle">WireGuard</text><text x="458" y="480" class="m xs mu" text-anchor="middle">agent traffic only</text><rect x="522" y="436" width="190" height="56" rx="10" class="card frame"/><text x="536" y="460" class="nm">Wuzah</text><text x="536" y="478" class="sm mu">Wazuh manager</text><line x1="718" y1="464" x2="830" y2="464" class="nt" marker-end="url(#ah-edge)"/><text x="774" y="456" class="m xs mu" text-anchor="middle">serious</text><text x="774" y="480" class="m xs mu" text-anchor="middle">alerts</text><rect x="838" y="436" width="190" height="56" rx="10" class="card frame"/><text x="852" y="460" class="nm">PMG</text><text x="852" y="478" class="sm mu">mail gateway</text><line x1="1034" y1="464" x2="1146" y2="464" class="nt" marker-end="url(#ah-edge)"/><text x="1090" y="456" class="m xs mu" text-anchor="middle">relay</text><rect x="1154" y="436" width="190" height="56" rx="10" class="card frame"/><text x="1168" y="460" class="nm">Brevo</text><text x="1168" y="478" class="sm mu">SMTP relay → inbox</text><g class="pk" data-legs="402,44 510,44;718,44 826,44;1034,44 1142,44" data-c="text text text" data-speed="110" data-delay="0" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,128 510,128;718,128 826,128;1034,128 1142,128" data-c="text text text" data-speed="110" data-delay="1.15" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,212 510,212;718,212 826,212" data-c="text text" data-speed="110" data-delay="2.3" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,296 510,296;718,296 826,296" data-c="text text" data-speed="110" data-delay="3.45" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,380 510,380;718,380 826,380;1034,380 1142,380" data-c="text text text" data-speed="110" data-delay="4.6" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g><g class="pk" data-legs="402,464 510,464;718,464 826,464;1034,464 1142,464" data-c="text text text" data-speed="110" data-delay="5.75" data-rest="2.5" data-hold="0.1"><circle r="7" class="pk-h"/><circle r="2.6" class="pk-c"/></g></svg></body></html>
